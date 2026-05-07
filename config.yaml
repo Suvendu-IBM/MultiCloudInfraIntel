@@ -1,0 +1,39 @@
+# Multi-Cloud Infrastructure Intelligence MCP Server Configuration
+
+server:
+  port: 8000
+  log_level: INFO
+  cache_ttl: 3600  # Cache TTL in seconds (1 hour)
+
+clouds:
+  aws:
+    default_region: ap-south-1
+    enabled: true
+  azure:
+    enabled: true
+  gcp:
+    enabled: true
+
+budgets:
+  default: 1000  # Default budget per team in USD
+  teams:
+    engineering: 5000
+    data_science: 3000
+    devops: 2000
+    qa: 1500
+
+compliance:
+  mandatory_tags:
+    - owner
+    - cost-center
+    - environment
+  encryption_required: true
+  public_access_allowed: false
+
+monitoring:
+  idle_cpu_threshold: 5  # CPU threshold percentage for idle resources
+  idle_lookback_days: 14  # Days to look back for idle resource detection
+  cost_anomaly_threshold: 20  # Percentage above average to flag as anomaly
+  cost_anomaly_lookback: 30  # Days to look back for cost anomaly detection
+
+# Made with Bob
