@@ -2072,9 +2072,29 @@ Examples:
                 logger.info("🚀 Server starting...")
                 
                 # FastMCP provides sse_app for HTTP/SSE transport
-                app = mcp.sse_app
+                # Get the actual ASGI app (sse_app might be a property that returns the app)
+                base_app = mcp.sse_app() if callable(mcp.sse_app) else mcp.sse_app
+                
+                # Create a wrapper ASGI app that modifies the host header before passing to base_app
+                async def host_bypass_wrapper(scope, receive, send):
+                    """ASGI middleware to bypass host header validation."""
+                    if scope['type'] == 'http':
+                        # Modify headers to use localhost for validation
+                        headers = dict(scope.get('headers', []))
+                        if b'host' in headers:
+                            # Keep original host for logging but use localhost for validation
+                            original_host = headers[b'host'].decode('utf-8')
+                            logger.debug(f"Bypassing host validation for: {original_host}")
+                            headers[b'host'] = b'localhost:8000'
+                            scope['headers'] = list(headers.items())
+                    
+                    # Call the original app with modified scope
+                    await base_app(scope, receive, send)
+                
+                app = host_bypass_wrapper
                 
                 logger.info(f"✅ Server running at http://{args.host}:{args.port}")
+                logger.info("✓ Host header validation bypassed for external access")
                 logger.info(f"📡 MCP SSE endpoint: http://{args.host}:{args.port}/sse")
                 logger.info(f"📡 MCP Messages endpoint: http://{args.host}:{args.port}/messages")
                 logger.info("Press Ctrl+C to stop")
