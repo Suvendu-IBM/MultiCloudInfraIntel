@@ -2067,6 +2067,7 @@ Examples:
             # For HTTP transport - use FastMCP's built-in SSE app
             try:
                 import uvicorn
+                from uvicorn import Config, Server
                 
                 logger.info("🚀 Server starting...")
                 
@@ -2078,7 +2079,17 @@ Examples:
                 logger.info(f"📡 MCP Messages endpoint: http://{args.host}:{args.port}/messages")
                 logger.info("Press Ctrl+C to stop")
                 
-                uvicorn.run(app, host=args.host, port=args.port, log_level=args.log_level.lower())
+                # Configure uvicorn to allow external connections and disable host header validation
+                config = Config(
+                    app=app,
+                    host=args.host,
+                    port=args.port,
+                    log_level=args.log_level.lower(),
+                    proxy_headers=True,
+                    forwarded_allow_ips="*"
+                )
+                server = Server(config=config)
+                server.run()
                 
             except ImportError:
                 logger.error("uvicorn not installed. Install with: pip install uvicorn")
