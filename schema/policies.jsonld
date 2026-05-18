@@ -1,0 +1,623 @@
+{
+  "@context": {
+    "sro": "http://example.org/sro#",
+    "schema": "http://schema.org/",
+    "id": "@id",
+    "type": "@type",
+    "name": "schema:name",
+    "description": "schema:description",
+    "attributes": "sro:attributes",
+    "identityKey": "sro:identityKey",
+    "humanRef": "sro:humanRef",
+    "invariant": "sro:invariant",
+    "hasState": {
+      "@id": "sro:hasState",
+      "@type": "@id"
+    },
+    "initialState": {
+      "@id": "sro:initialState",
+      "@type": "@id"
+    },
+    "terminalStates": {
+      "@id": "sro:terminalStates",
+      "@type": "@id"
+    },
+    "relatesTo": {
+      "@id": "sro:relatesTo",
+      "@type": "@id"
+    },
+    "emitsEvent": {
+      "@id": "sro:emitsEvent",
+      "@type": "@id"
+    },
+    "from": {
+      "@id": "sro:from",
+      "@type": "@id"
+    },
+    "to": {
+      "@id": "sro:to",
+      "@type": "@id"
+    },
+    "precondition": "sro:precondition",
+    "postcondition": "sro:postcondition",
+    "Entity": "sro:Entity",
+    "Operation": "sro:Operation",
+    "State": "sro:State"
+  },
+  "@graph": [
+    {
+      "id": "sro:ResourcePolicy",
+      "type": "Entity",
+      "name": "ResourcePolicy",
+      "description": "Base policy for managing cloud resources across multi-cloud infrastructure",
+      "identityKey": "policyId: UUID",
+      "humanRef": "policyName",
+      "attributes": {
+        "policyId": "string",
+        "policyName": "string",
+        "description": "string",
+        "cloudProvider": "AWS|AZURE|GCP|MULTI",
+        "enabled": "boolean",
+        "priority": "HIGH|MEDIUM|LOW",
+        "status": "DRAFT|ACTIVE|SUSPENDED|ARCHIVED"
+      },
+      "invariant": [
+        "policyName must be unique",
+        "cloudProvider must be one of defined values",
+        "enabled policies must have status ACTIVE"
+      ],
+      "hasState": [
+        "sro:PolicyDraft",
+        "sro:PolicyActive",
+        "sro:PolicySuspended",
+        "sro:PolicyArchived"
+      ],
+      "initialState": "sro:PolicyDraft",
+      "terminalStates": [
+        "sro:PolicyArchived"
+      ],
+      "relatesTo": [
+        "sro:CloudResource",
+        "sro:PolicyViolation",
+        "sro:AlertNotification"
+      ],
+      "emitsEvent": [
+        "sro:PolicyActivated",
+        "sro:PolicyViolated",
+        "sro:PolicySuspended"
+      ]
+    },
+    {
+      "id": "sro:CostTrendsPolicy",
+      "type": "Entity",
+      "name": "CostTrendsPolicy",
+      "description": "Monitors and analyzes cost trends across cloud resources",
+      "identityKey": "policyId: UUID",
+      "humanRef": "policyName",
+      "attributes": {
+        "policyId": "string",
+        "policyName": "string",
+        "description": "string",
+        "cloudProvider": "AWS|AZURE|GCP|MULTI",
+        "enabled": "boolean",
+        "trendPeriod": "DAILY|WEEKLY|MONTHLY",
+        "increaseThreshold": "number",
+        "alertOnIncrease": "boolean",
+        "status": "DRAFT|ACTIVE|SUSPENDED|ARCHIVED"
+      },
+      "invariant": [
+        "policyName must be unique",
+        "increaseThreshold must be positive number",
+        "trendPeriod must be one of defined values"
+      ],
+      "hasState": [
+        "sro:PolicyDraft",
+        "sro:PolicyActive",
+        "sro:PolicySuspended",
+        "sro:PolicyArchived"
+      ],
+      "initialState": "sro:PolicyDraft",
+      "terminalStates": [
+        "sro:PolicyArchived"
+      ],
+      "relatesTo": [
+        "sro:CloudResource",
+        "sro:CostReport",
+        "sro:AlertNotification"
+      ],
+      "emitsEvent": [
+        "sro:CostTrendDetected",
+        "sro:CostIncreaseAlert"
+      ]
+    },
+    {
+      "id": "sro:AnomalyPolicy",
+      "type": "Entity",
+      "name": "AnomalyPolicy",
+      "description": "Detects anomalies in resource usage and costs with configurable threshold",
+      "identityKey": "policyId: UUID",
+      "humanRef": "policyName",
+      "attributes": {
+        "policyId": "string",
+        "policyName": "string",
+        "description": "string",
+        "cloudProvider": "AWS|AZURE|GCP|MULTI",
+        "enabled": "boolean",
+        "anomalyThreshold": "number",
+        "detectionMetric": "COST|CPU|MEMORY|NETWORK|STORAGE",
+        "baselinePeriod": "number",
+        "status": "DRAFT|ACTIVE|SUSPENDED|ARCHIVED"
+      },
+      "invariant": [
+        "policyName must be unique",
+        "anomalyThreshold must be 20 percent by default",
+        "baselinePeriod must be at least 7 days",
+        "detectionMetric must be one of defined values"
+      ],
+      "hasState": [
+        "sro:PolicyDraft",
+        "sro:PolicyActive",
+        "sro:PolicySuspended",
+        "sro:PolicyArchived"
+      ],
+      "initialState": "sro:PolicyDraft",
+      "terminalStates": [
+        "sro:PolicyArchived"
+      ],
+      "relatesTo": [
+        "sro:CloudResource",
+        "sro:AnomalyDetection",
+        "sro:AlertNotification"
+      ],
+      "emitsEvent": [
+        "sro:AnomalyDetected",
+        "sro:AnomalyResolved"
+      ]
+    },
+    {
+      "id": "sro:NewResourcePolicy",
+      "type": "Entity",
+      "name": "NewResourcePolicy",
+      "description": "Tracks and validates newly created cloud resources",
+      "identityKey": "policyId: UUID",
+      "humanRef": "policyName",
+      "attributes": {
+        "policyId": "string",
+        "policyName": "string",
+        "description": "string",
+        "cloudProvider": "AWS|AZURE|GCP|MULTI",
+        "enabled": "boolean",
+        "autoTagging": "boolean",
+        "requireApproval": "boolean",
+        "notifyOnCreation": "boolean",
+        "status": "DRAFT|ACTIVE|SUSPENDED|ARCHIVED"
+      },
+      "invariant": [
+        "policyName must be unique",
+        "New resources must be tracked within 5 minutes of creation"
+      ],
+      "hasState": [
+        "sro:PolicyDraft",
+        "sro:PolicyActive",
+        "sro:PolicySuspended",
+        "sro:PolicyArchived"
+      ],
+      "initialState": "sro:PolicyDraft",
+      "terminalStates": [
+        "sro:PolicyArchived"
+      ],
+      "relatesTo": [
+        "sro:CloudResource",
+        "sro:CompliancePolicy",
+        "sro:AlertNotification"
+      ],
+      "emitsEvent": [
+        "sro:NewResourceDetected",
+        "sro:ResourceApprovalRequired"
+      ]
+    },
+    {
+      "id": "sro:IdleResourcePolicy",
+      "type": "Entity",
+      "name": "IdleResourcePolicy",
+      "description": "Identifies and manages idle resources with CPU usage below 5% for 14 days",
+      "identityKey": "policyId: UUID",
+      "humanRef": "policyName",
+      "attributes": {
+        "policyId": "string",
+        "policyName": "string",
+        "description": "string",
+        "cloudProvider": "AWS|AZURE|GCP|MULTI",
+        "enabled": "boolean",
+        "cpuThreshold": "number",
+        "idleDuration": "number",
+        "autoShutdown": "boolean",
+        "notifyBeforeAction": "boolean",
+        "status": "DRAFT|ACTIVE|SUSPENDED|ARCHIVED"
+      },
+      "invariant": [
+        "policyName must be unique",
+        "cpuThreshold must be less than 5 percent",
+        "idleDuration must be 14 days",
+        "autoShutdown requires notifyBeforeAction to be true"
+      ],
+      "hasState": [
+        "sro:PolicyDraft",
+        "sro:PolicyActive",
+        "sro:PolicySuspended",
+        "sro:PolicyArchived"
+      ],
+      "initialState": "sro:PolicyDraft",
+      "terminalStates": [
+        "sro:PolicyArchived"
+      ],
+      "relatesTo": [
+        "sro:CloudResource",
+        "sro:CostOptimization",
+        "sro:AlertNotification"
+      ],
+      "emitsEvent": [
+        "sro:IdleResourceDetected",
+        "sro:ResourceShutdownScheduled"
+      ]
+    },
+    {
+      "id": "sro:CompliancePolicy",
+      "type": "Entity",
+      "name": "CompliancePolicy",
+      "description": "Enforces compliance rules including required tags: owner, cost-center, environment",
+      "identityKey": "policyId: UUID",
+      "humanRef": "policyName",
+      "attributes": {
+        "policyId": "string",
+        "policyName": "string",
+        "description": "string",
+        "cloudProvider": "AWS|AZURE|GCP|MULTI",
+        "enabled": "boolean",
+        "requiredTags": "array",
+        "enforcementLevel": "WARN|BLOCK|AUDIT",
+        "autoRemediation": "boolean",
+        "status": "DRAFT|ACTIVE|SUSPENDED|ARCHIVED"
+      },
+      "invariant": [
+        "policyName must be unique",
+        "requiredTags must include owner, cost-center, environment",
+        "enforcementLevel must be one of defined values",
+        "Resources without required tags must be flagged"
+      ],
+      "hasState": [
+        "sro:PolicyDraft",
+        "sro:PolicyActive",
+        "sro:PolicySuspended",
+        "sro:PolicyArchived"
+      ],
+      "initialState": "sro:PolicyDraft",
+      "terminalStates": [
+        "sro:PolicyArchived"
+      ],
+      "relatesTo": [
+        "sro:CloudResource",
+        "sro:PolicyViolation",
+        "sro:AlertNotification"
+      ],
+      "emitsEvent": [
+        "sro:ComplianceViolation",
+        "sro:ComplianceRestored"
+      ]
+    },
+    {
+      "id": "sro:ExpensiveResourcePolicy",
+      "type": "Entity",
+      "name": "ExpensiveResourcePolicy",
+      "description": "Monitors and limits expensive resources with configurable cost limit of 10",
+      "identityKey": "policyId: UUID",
+      "humanRef": "policyName",
+      "attributes": {
+        "policyId": "string",
+        "policyName": "string",
+        "description": "string",
+        "cloudProvider": "AWS|AZURE|GCP|MULTI",
+        "enabled": "boolean",
+        "costLimit": "number",
+        "limitPeriod": "DAILY|WEEKLY|MONTHLY",
+        "actionOnExceed": "ALERT|THROTTLE|SHUTDOWN",
+        "status": "DRAFT|ACTIVE|SUSPENDED|ARCHIVED"
+      },
+      "invariant": [
+        "policyName must be unique",
+        "costLimit must be 10 by default",
+        "actionOnExceed must be one of defined values",
+        "Resources exceeding limit must trigger action"
+      ],
+      "hasState": [
+        "sro:PolicyDraft",
+        "sro:PolicyActive",
+        "sro:PolicySuspended",
+        "sro:PolicyArchived"
+      ],
+      "initialState": "sro:PolicyDraft",
+      "terminalStates": [
+        "sro:PolicyArchived"
+      ],
+      "relatesTo": [
+        "sro:CloudResource",
+        "sro:CostReport",
+        "sro:AlertNotification"
+      ],
+      "emitsEvent": [
+        "sro:CostLimitExceeded",
+        "sro:ResourceThrottled"
+      ]
+    },
+    {
+      "id": "sro:BudgetPolicy",
+      "type": "Entity",
+      "name": "BudgetPolicy",
+      "description": "Manages budget thresholds with warning at 80% and critical at 100%",
+      "identityKey": "policyId: UUID",
+      "humanRef": "policyName",
+      "attributes": {
+        "policyId": "string",
+        "policyName": "string",
+        "description": "string",
+        "cloudProvider": "AWS|AZURE|GCP|MULTI",
+        "enabled": "boolean",
+        "budgetAmount": "number",
+        "warningThreshold": "number",
+        "criticalThreshold": "number",
+        "budgetPeriod": "MONTHLY|QUARTERLY|YEARLY",
+        "status": "DRAFT|ACTIVE|SUSPENDED|ARCHIVED"
+      },
+      "invariant": [
+        "policyName must be unique",
+        "warningThreshold must be 80 percent",
+        "criticalThreshold must be 100 percent",
+        "budgetAmount must be positive number",
+        "warningThreshold must be less than criticalThreshold"
+      ],
+      "hasState": [
+        "sro:PolicyDraft",
+        "sro:PolicyActive",
+        "sro:PolicySuspended",
+        "sro:PolicyArchived"
+      ],
+      "initialState": "sro:PolicyDraft",
+      "terminalStates": [
+        "sro:PolicyArchived"
+      ],
+      "relatesTo": [
+        "sro:CloudResource",
+        "sro:CostReport",
+        "sro:AlertNotification"
+      ],
+      "emitsEvent": [
+        "sro:BudgetWarningReached",
+        "sro:BudgetCriticalReached",
+        "sro:BudgetExceeded"
+      ]
+    },
+    {
+      "id": "sro:CloudResource",
+      "type": "Entity",
+      "name": "CloudResource",
+      "description": "A cloud infrastructure resource managed by policies",
+      "identityKey": "resourceId: UUID",
+      "humanRef": "resourceName",
+      "attributes": {
+        "resourceId": "string",
+        "resourceName": "string",
+        "resourceType": "string",
+        "cloudProvider": "AWS|AZURE|GCP",
+        "region": "string",
+        "tags": "object",
+        "cost": "number",
+        "status": "RUNNING|STOPPED|TERMINATED"
+      },
+      "invariant": [
+        "resourceId must be unique",
+        "cloudProvider must be one of defined values"
+      ],
+      "relatesTo": [
+        "sro:ResourcePolicy",
+        "sro:PolicyViolation"
+      ]
+    },
+    {
+      "id": "sro:PolicyViolation",
+      "type": "Entity",
+      "name": "PolicyViolation",
+      "description": "Records violations of policy rules",
+      "identityKey": "violationId: UUID",
+      "humanRef": "violationCode",
+      "attributes": {
+        "violationId": "string",
+        "violationCode": "string",
+        "severity": "LOW|MEDIUM|HIGH|CRITICAL",
+        "detectedAt": "timestamp",
+        "resolvedAt": "timestamp|null",
+        "status": "OPEN|ACKNOWLEDGED|RESOLVED|IGNORED"
+      },
+      "invariant": [
+        "violationCode must be unique",
+        "severity must be one of defined values"
+      ],
+      "hasState": [
+        "sro:ViolationOpen",
+        "sro:ViolationAcknowledged",
+        "sro:ViolationResolved",
+        "sro:ViolationIgnored"
+      ],
+      "initialState": "sro:ViolationOpen",
+      "terminalStates": [
+        "sro:ViolationResolved",
+        "sro:ViolationIgnored"
+      ],
+      "relatesTo": [
+        "sro:ResourcePolicy",
+        "sro:CloudResource",
+        "sro:AlertNotification"
+      ]
+    },
+    {
+      "id": "sro:AlertNotification",
+      "type": "Entity",
+      "name": "AlertNotification",
+      "description": "Notification sent when policy events occur",
+      "identityKey": "alertId: UUID",
+      "humanRef": "alertCode",
+      "attributes": {
+        "alertId": "string",
+        "alertCode": "string",
+        "message": "string",
+        "severity": "INFO|WARNING|ERROR|CRITICAL",
+        "sentAt": "timestamp",
+        "recipients": "array"
+      },
+      "invariant": [
+        "alertCode must be unique",
+        "recipients must not be empty"
+      ],
+      "relatesTo": [
+        "sro:ResourcePolicy",
+        "sro:PolicyViolation"
+      ]
+    },
+    {
+      "id": "sro:CostReport",
+      "type": "Entity",
+      "name": "CostReport",
+      "description": "Aggregated cost data for analysis",
+      "identityKey": "reportId: UUID",
+      "humanRef": "reportName",
+      "attributes": {
+        "reportId": "string",
+        "reportName": "string",
+        "period": "string",
+        "totalCost": "number",
+        "breakdown": "object",
+        "generatedAt": "timestamp"
+      },
+      "invariant": [
+        "reportId must be unique",
+        "totalCost must be non-negative"
+      ],
+      "relatesTo": [
+        "sro:CloudResource",
+        "sro:CostTrendsPolicy",
+        "sro:BudgetPolicy"
+      ]
+    },
+    {
+      "id": "sro:ApplyPolicy",
+      "type": "Operation",
+      "name": "ApplyPolicy",
+      "description": "Applies a policy to cloud resources",
+      "from": "sro:ResourcePolicy",
+      "to": "sro:CloudResource",
+      "precondition": [
+        "Policy must be in ACTIVE state",
+        "Resource must exist"
+      ],
+      "postcondition": [
+        "Policy is applied to resource",
+        "Resource is monitored by policy"
+      ]
+    },
+    {
+      "id": "sro:DetectViolation",
+      "type": "Operation",
+      "name": "DetectViolation",
+      "description": "Detects policy violations on resources",
+      "from": "sro:ResourcePolicy",
+      "to": "sro:PolicyViolation",
+      "precondition": [
+        "Policy must be ACTIVE",
+        "Resource must violate policy rules"
+      ],
+      "postcondition": [
+        "Violation is recorded",
+        "Alert notification is triggered"
+      ]
+    },
+    {
+      "id": "sro:SendAlert",
+      "type": "Operation",
+      "name": "SendAlert",
+      "description": "Sends alert notification for policy events",
+      "from": "sro:PolicyViolation",
+      "to": "sro:AlertNotification",
+      "precondition": [
+        "Violation must exist",
+        "Recipients must be configured"
+      ],
+      "postcondition": [
+        "Alert is sent to recipients",
+        "Notification is logged"
+      ]
+    },
+    {
+      "id": "sro:GenerateReport",
+      "type": "Operation",
+      "name": "GenerateReport",
+      "description": "Generates cost report for analysis",
+      "from": "sro:CloudResource",
+      "to": "sro:CostReport",
+      "precondition": [
+        "Resources must have cost data",
+        "Report period must be defined"
+      ],
+      "postcondition": [
+        "Report is generated with cost breakdown",
+        "Report is available for policy evaluation"
+      ]
+    },
+    {
+      "id": "sro:PolicyDraft",
+      "type": "State",
+      "name": "PolicyDraft",
+      "description": "Policy is being drafted and not yet active"
+    },
+    {
+      "id": "sro:PolicyActive",
+      "type": "State",
+      "name": "PolicyActive",
+      "description": "Policy is active and monitoring resources"
+    },
+    {
+      "id": "sro:PolicySuspended",
+      "type": "State",
+      "name": "PolicySuspended",
+      "description": "Policy is temporarily suspended"
+    },
+    {
+      "id": "sro:PolicyArchived",
+      "type": "State",
+      "name": "PolicyArchived",
+      "description": "Policy is archived and no longer active"
+    },
+    {
+      "id": "sro:ViolationOpen",
+      "type": "State",
+      "name": "ViolationOpen",
+      "description": "Violation has been detected and is open"
+    },
+    {
+      "id": "sro:ViolationAcknowledged",
+      "type": "State",
+      "name": "ViolationAcknowledged",
+      "description": "Violation has been acknowledged by team"
+    },
+    {
+      "id": "sro:ViolationResolved",
+      "type": "State",
+      "name": "ViolationResolved",
+      "description": "Violation has been resolved"
+    },
+    {
+      "id": "sro:ViolationIgnored",
+      "type": "State",
+      "name": "ViolationIgnored",
+      "description": "Violation has been marked as ignored"
+    }
+  ]
+}
