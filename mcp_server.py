@@ -807,7 +807,14 @@ class MultiCloudIntelligenceServer:
     async def _get_aws_resources(self, region: Optional[str], resource_type: Optional[str]) -> List[ResourceSummary]:
         """Fetch AWS resources (EC2, RDS, S3, Lambda, etc.)"""
         resources = []
-        regions = [region] if region else self.config.get('clouds.aws.regions', ['us-east-1'])
+        # Use provided region, or fall back to configured regions, or default_region, or us-east-1
+        if region:
+            regions = [region]
+        else:
+            regions = self.config.get('clouds.aws.regions', None)
+            if not regions:
+                default_region = self.config.get('clouds.aws.default_region', 'us-east-1')
+                regions = [default_region]
         
         for reg in regions:
             try:
@@ -868,8 +875,8 @@ class MultiCloudIntelligenceServer:
                             }
                         ))
                 
-                # S3 Buckets (global service, only once)
-                if not reg != regions[0]:
+                # S3 Buckets (global service, only fetch once for first region)
+                if reg == regions[0] and (not resource_type or resource_type == 's3'):
                     s3 = self.aws.get_client('s3')
                     
                     def fetch_buckets():
