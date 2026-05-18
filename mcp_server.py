@@ -2067,7 +2067,7 @@ Examples:
             # For HTTP transport - use FastMCP's built-in SSE app
             try:
                 import uvicorn
-                from uvicorn import Config, Server
+                from uvicorn import Config as UvicornConfig, Server
                 
                 logger.info("🚀 Server starting...")
                 
@@ -2080,7 +2080,7 @@ Examples:
                 logger.info("Press Ctrl+C to stop")
                 
                 # Configure uvicorn to allow external connections and disable host header validation
-                config = Config(
+                uvicorn_config = UvicornConfig(
                     app=app,
                     host=args.host,
                     port=args.port,
@@ -2088,7 +2088,7 @@ Examples:
                     proxy_headers=True,
                     forwarded_allow_ips="*"
                 )
-                server = Server(config=config)
+                server = Server(uvicorn_config)
                 server.run()
                 
             except ImportError:
