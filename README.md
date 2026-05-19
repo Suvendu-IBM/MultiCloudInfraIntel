@@ -1,419 +1,497 @@
-# Multi-Cloud Infrastructure Intelligence MCP Server
+# Multi-Cloud Infrastructure Intelligence - Complete Agentic AI Solution
 
-Production-grade enterprise MCP server for multi-cloud infrastructure intelligence supporting AWS, Azure, and GCP with real API integrations.
+An end-to-end Agentic AI solution for multi-cloud infrastructure intelligence using IBM Consulting Advantage (ICA), Context Studio, and custom MCP servers.
 
-## Features
+## Solution Overview
 
-- **8 Production-Grade Tools** for infrastructure intelligence and cost management
-- **Multi-Cloud Support**: AWS, Azure, and GCP with unified API
-- **Real API Integrations**: Direct integration with cloud provider APIs
-- **Intelligent Caching**: 1-hour TTL cache to reduce API calls
-- **Graceful Degradation**: Works with partial cloud credentials
-- **Comprehensive Error Handling**: Exponential backoff and retry logic
-- **Type-Safe**: Full type hints throughout
-- **Production-Ready**: Structured logging, configuration management, health checks
+This solution provides natural language querying and automated reasoning across **AWS, Azure, and GCP** for:
+- **Resource Inventory**: Unified view of all cloud resources across multiple providers
+- **Cost Analysis**: Cost trends, anomaly detection, budget tracking
+- **Idle Resource Detection**: Identify waste and estimate savings
+- **Compliance Checking**: Tagging, encryption, and public access validation
 
-## Requirements
-
-- Python 3.11 or higher
-- Cloud provider credentials (at least one of AWS, Azure, or GCP)
-- FastMCP framework
-
-## Installation
-
-### 1. Clone or Download
-
-```bash
-cd MultiCloudInfraIntel
-```
-
-### 2. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Configure Cloud Credentials
-
-#### AWS
-
-**Option 1: AWS CLI (Recommended)**
-```bash
-aws configure
-```
-
-**Option 2: Environment Variables**
-```bash
-export AWS_ACCESS_KEY_ID=your_access_key
-export AWS_SECRET_ACCESS_KEY=your_secret_key
-export AWS_DEFAULT_REGION=us-east-1
-```
-
-#### Azure
-
-**Option 1: Azure CLI (Recommended)**
-```bash
-az login
-```
-
-**Option 2: Environment Variables**
-```bash
-export AZURE_SUBSCRIPTION_ID=your_subscription_id
-export AZURE_TENANT_ID=your_tenant_id
-export AZURE_CLIENT_ID=your_client_id
-export AZURE_CLIENT_SECRET=your_client_secret
-```
-
-#### GCP
-
-**Option 1: Application Default Credentials (Recommended)**
-```bash
-gcloud auth application-default login
-```
-
-**Option 2: Service Account Key**
-```bash
-export GCP_PROJECT_ID=your_project_id
-export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
-```
-
-### 4. Configure Server
-
-Edit `config.yaml` to customize:
-- Budget thresholds per team
-- Compliance rules (mandatory tags)
-- Monitoring thresholds
-- Cache TTL
-
-### 5. Run the Server
-
-**For HTTP transport (ICA/web connections):**
-```bash
-python mcp_server.py --transport http --port 8000
-```
-
-**For stdio transport (local Claude Desktop):**
-```bash
-python mcp_server.py --transport stdio
-```
-
-**With custom configuration:**
-```bash
-python mcp_server.py --config custom-config.yaml --log-level DEBUG
-```
-
-## The 8 Tools
-
-### 1. get_resource_summary
-
-Get a unified view of all resources across connected clouds.
-
-**Parameters:**
-- `cloud_provider` (optional): Filter by provider (aws, azure, gcp)
-- `region` (optional): Filter by region
-- `resource_type` (optional): Filter by type (ec2, vm, instance)
-
-**Example:**
-```python
-{
-  "cloud_provider": "aws",
-  "region": "us-east-1",
-  "resource_type": "ec2"
-}
-```
-
-### 2. get_cost_trends
-
-Analyze cost trends across all clouds with daily or monthly granularity.
-
-**Parameters:**
-- `start_date` (required): Start date in YYYY-MM-DD format
-- `end_date` (required): End date in YYYY-MM-DD format
-- `granularity` (optional): DAILY or MONTHLY (default: DAILY)
-
-**Example:**
-```python
-{
-  "start_date": "2024-01-01",
-  "end_date": "2024-01-31",
-  "granularity": "DAILY"
-}
-```
-
-### 3. get_cost_anomaly
-
-Detect cost spikes using rolling 7-day average analysis.
-
-**Parameters:**
-- `threshold_percent` (optional): Percentage above average to flag (default: 20%)
-- `lookback_days` (optional): Days to analyze (default: 30)
-
-**Example:**
-```python
-{
-  "threshold_percent": 20,
-  "lookback_days": 30
-}
-```
-
-### 4. get_new_resources_since
-
-Track resources created after a specific date.
-
-**Parameters:**
-- `cutoff_date` (required): Date in YYYY-MM-DD format
-
-**Example:**
-```python
-{
-  "cutoff_date": "2024-01-01"
-}
-```
-
-### 5. find_idle_resources
-
-Identify underutilized resources based on CPU metrics.
-
-**Parameters:**
-- `cpu_threshold_percent` (optional): CPU threshold (default: 5%)
-- `days_lookback` (optional): Days to analyze (default: 14)
-
-**Example:**
-```python
-{
-  "cpu_threshold_percent": 5,
-  "days_lookback": 14
-}
-```
-
-### 6. check_compliance
-
-Validate resources against compliance rules.
-
-**Parameters:**
-- `rule_type` (required): encryption | tagging | public_access
-- `tag_key` (optional): Specific tag to check (for tagging rule)
-
-**Example:**
-```python
-{
-  "rule_type": "tagging",
-  "tag_key": "owner"
-}
-```
-
-**Compliance Rules:**
-- **encryption**: Checks EBS volumes, Azure disks, GCP persistent disks
-- **tagging**: Validates mandatory tags (owner, cost-center, environment)
-- **public_access**: Detects publicly accessible S3 buckets, Azure storage, GCP buckets
-
-### 7. get_top_expensive_resources
-
-Rank resources by estimated monthly cost.
-
-**Parameters:**
-- `limit` (optional): Number of resources to return (default: 10)
-- `start_date` (optional): Start date for cost calculation
-- `end_date` (optional): End date for cost calculation
-
-**Example:**
-```python
-{
-  "limit": 10
-}
-```
-
-### 8. get_budget_health
-
-Monitor spending against budgets with projections.
-
-**Parameters:**
-- `team_name` (optional): Team name to check budget for
-- `budget_amount` (optional): Override budget amount
-
-**Example:**
-```python
-{
-  "team_name": "engineering",
-  "budget_amount": 5000
-}
-```
-
-**Status Values:**
-- `on_track`: Projected spend < 80% of budget
-- `at_risk`: Projected spend 80-100% of budget
-- `over`: Projected spend > 100% of budget
-
-## Health Check
-
-Check server and cloud connection status:
-
-```bash
-curl http://localhost:8000/health
-```
-
-## Configuration
-
-### config.yaml Structure
-
-```yaml
-server:
-  port: 8000
-  log_level: INFO
-  cache_ttl: 3600
-
-clouds:
-  aws:
-    default_region: us-east-1
-    enabled: true
-  azure:
-    enabled: true
-  gcp:
-    enabled: true
-
-budgets:
-  default: 1000
-  teams:
-    engineering: 5000
-    data_science: 3000
-
-compliance:
-  mandatory_tags:
-    - owner
-    - cost-center
-    - environment
-  encryption_required: true
-  public_access_allowed: false
-
-monitoring:
-  idle_cpu_threshold: 5
-  idle_lookback_days: 14
-  cost_anomaly_threshold: 20
-  cost_anomaly_lookback: 30
-```
-
-## Testing
-
-### Run Unit Tests
-
-```bash
-pytest tests/test_mcp_server.py -v
-```
-
-### Run Integration Tests
-
-```bash
-pytest tests/test_integration.py -v
-```
-
-### Validate All Tools
-
-```bash
-python tests/validate_tools.py
-```
+**Multi-Cloud Capability**: The MCP server code is fully implemented for AWS, Azure, and GCP. Currently tested with AWS credentials only. To enable Azure and GCP, simply add their respective credentials to the configuration.
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    FastMCP Server                           │
-├─────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │ AWS Auth     │  │ Azure Auth   │  │ GCP Auth     │     │
-│  │ Manager      │  │ Manager      │  │ Manager      │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
-├─────────────────────────────────────────────────────────────┤
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │           Cache Layer (1-hour TTL)                   │  │
-│  └──────────────────────────────────────────────────────┘  │
-├─────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │ Resource     │  │ Cost         │  │ Compliance   │     │
-│  │ Tools        │  │ Tools        │  │ Tools        │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
-└─────────────────────────────────────────────────────────────┘
-         │                  │                  │
-         ▼                  ▼                  ▼
-    ┌────────┐        ┌────────┐        ┌────────┐
-    │  AWS   │        │ Azure  │        │  GCP   │
-    │  APIs  │        │  APIs  │        │  APIs  │
-    └────────┘        └────────┘        └────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        USER INTERFACE (ICA Playground)                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          ICA AGENTIC APP STUDIO                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │            Multi-Cloud Infrastructure Analyst Agent                 │   │
+│  │                        (15 Tools Total)                             │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                │                      │                      │               │
+│    ┌───────────────────┼───────────────────────┐                            │
+│    ▼                   ▼                       ▼                            │
+│  ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────────┐    │
+│  │ Context Studio    │ │ Multi-Cloud MCP   │ │ Workflows             │    │
+│  │ MCP Gateway       │ │ Gateway           │ │ (LangGraph)           │    │
+│  │ (7 Policy Tools)  │ │ (8 Data Tools)    │ │                       │    │
+│  └─────────┬─────────┘ └─────────┬─────────┘ └───────────────────────┘    │
+│            │                      │                                         │
+└────────────┼───────────────────────┼─────────────────────────────────────────┘
+             │                      │
+             ▼                      ▼
+┌─────────────────────┐  ┌─────────────────────────────────────────────────┐
+│  Context Studio     │  │              EC2 Instance (AWS)                 │
+│   (IBM Cloud)       │  │  ┌─────────────────────────────────────────────┐│
+│                     │  │  │      MCP Server (Python/FastMCP)            ││
+│ • JSON-LD Schema    │  │  │                                             ││
+│ • 8 Policy Files    │  │  │  8 Tools:                                   ││
+│ • Knowledge Graph   │  │  │  • get-resource-summary                     ││
+│                     │  │  │  • get-cost-trends                          ││
+└─────────────────────┘  │  │  • get-cost-anomaly                         ││
+                         │  │  • get-new-resources-since                  ││
+                         │  │  • find-idle-resources                      ││
+                         │  │  • check-compliance                         ││
+                         │  │  • get-top-expensive-resources              ││
+                         │  │  • get-budget-health                        ││
+                         │  └─────────────────────────────────────────────┘│
+                         └─────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+                         ┌─────────────────────────────────────────┐
+                         │         Multi-Cloud APIs                │
+                         │  ┌─────────────┬─────────────┬─────────┐│
+                         │  │    AWS      │   Azure     │   GCP   ││
+                         │  │  • EC2      │ • VMs       │ • CE    ││
+                         │  │  • Cost Exp │ • Cost Mgmt │ • Billing││
+                         │  │  • CloudWatch│ • Monitor  │ • Monitor││
+                         │  │  • Config   │ • Policy    │ • Asset ││
+                         │  └─────────────┴─────────────┴─────────┘│
+                         └─────────────────────────────────────────┘
 ```
 
-## Error Handling
+## Prerequisites
 
-The server implements comprehensive error handling:
+- IBM Consulting Advantage (ICA) access
+- **Cloud Provider Credentials** (one or more):
+  - **AWS**: EC2, Cost Explorer, CloudWatch, Config permissions
+  - **Azure**: Virtual Machines, Cost Management, Monitor, Policy (optional)
+  - **GCP**: Compute Engine, Billing, Cloud Monitoring, Asset Inventory (optional)
+- Python 3.11+ for local development
+- Git
 
-- **Exponential Backoff**: Automatic retry with 1s, 2s, 4s, 8s, 16s delays
-- **Rate Limiting Detection**: Detects 429/throttling errors
-- **Timeout Protection**: 30-second timeout per API call
-- **Graceful Degradation**: Missing cloud credentials return empty results with warnings
+**Note**: The solution is fully multi-cloud capable. Currently tested with AWS credentials. Azure and GCP support is code-ready and can be enabled by adding credentials.
 
-## Performance
+## Complete Implementation Guide
 
-- **Caching**: 1-hour TTL reduces redundant API calls
-- **Async Operations**: All API calls use async/await pattern
-- **Parallel Execution**: Multi-cloud queries run concurrently
-- **Efficient Filtering**: Client-side filtering reduces data transfer
+### Phase 1: Context Studio Setup (Policies)
 
-## Security Best Practices
+#### Step 1.1: Generate JSON-LD Schema
 
-1. **Never commit credentials** to version control
-2. **Use IAM roles** when running on cloud instances
-3. **Rotate credentials** regularly
-4. **Use least-privilege** access policies
-5. **Enable MFA** on cloud accounts
-6. **Monitor API usage** for anomalies
+Use Bob to generate the schema:
+
+```bash
+# Prompt Bob with:
+"Generate a JSON-LD schema for Multi-Cloud Infrastructure Policies with entities for:
+- IdleResourcePolicy (cpuThresholdPercent, lookbackDays)
+- CostAnomalyPolicy (thresholdPercent, lookbackDays)
+- CompliancePolicy (ruleType, mandatoryTags)
+- BudgetPolicy (warningThresholdPercent, criticalThresholdPercent)
+- CloudResource (resourceId, provider, type, region, state, createdTime, tags)"
+```
+
+Save the output as `schema/multi-cloud-policies.jsonld`.
+
+#### Step 1.2: Create 8 Policy Markdown Files
+
+Create these files in the `policies/` directory:
+
+1. **resource-policy.md** - Resource discovery and filtering rules
+2. **cost-trends-policy.md** - Cost analysis standards
+3. **anomaly-policy.md** - Anomaly detection thresholds
+4. **new-resource-policy.md** - New resource tracking rules
+5. **idle-resource-policy.md** - Idle resource definitions
+6. **compliance-policy.md** - Tagging, encryption, access rules
+7. **expensive-resource-policy.md** - Cost threshold definitions
+8. **budget-policy.md** - Budget allocation and alerting
+
+#### Step 1.3: Import to Context Studio
+
+1. Navigate to Context Studio in ICA
+2. Click "Start with a Schema" → "Create schema" → "Import schema"
+3. Upload `multi-cloud-policies.jsonld`
+4. Name: "Multi-Cloud Policies" → Publish
+5. Click "Create a Context" → Name: "Multi-Cloud Infrastructure Context"
+6. Link the schema
+7. Go to "Source & Data" tab → Upload all 8 policy markdown files
+8. Click "Expose as MCP" → Copy the MCP Server URL and Bearer Token
+
+### Phase 2: Deploy MCP Server on EC2
+
+#### Step 2.1: Launch EC2 Instance
+
+```bash
+# Launch t2.micro Ubuntu 22.04 instance
+# Security Group: Allow SSH (22) and Custom TCP (8000) from 0.0.0.0/0
+```
+
+#### Step 2.2: Setup EC2
+
+```bash
+# SSH into EC2
+ssh -i your-key.pem ubuntu@<EC2-PUBLIC-IP>
+
+# Clone repository
+git clone https://github.com/Suvendu-IBM/MultiCloudInfraIntel.git
+cd MultiCloudInfraIntel
+
+# Create virtual environment
+python3 -m venv mcp-env
+source mcp-env/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure AWS credentials (required for current testing)
+aws configure
+# Enter: AWS Access Key ID, Secret Key, region (ap-south-1)
+
+# Optional: Configure Azure credentials
+# az login
+# az account set --subscription <subscription-id>
+
+# Optional: Configure GCP credentials
+# gcloud auth application-default login
+# gcloud config set project <project-id>
+```
+
+#### Step 2.3: Run as Systemd Service
+
+```bash
+# Create service file
+sudo nano /etc/systemd/system/mcp-server.service
+```
+
+```ini
+[Unit]
+Description=Multi-Cloud MCP Server
+After=network.target network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/MultiCloudInfraIntel
+Environment="PATH=/home/ubuntu/MultiCloudInfraIntel/mcp-env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/ubuntu/MultiCloudInfraIntel/mcp-env/bin/python /home/ubuntu/MultiCloudInfraIntel/mcp_server.py --transport http --port 8000 --host 0.0.0.0
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable mcp-server
+sudo systemctl start mcp-server
+sudo systemctl status mcp-server
+```
+
+### Phase 3: ICA Agentic App Studio Setup
+
+#### Step 3.1: Create Agentic App
+
+1. Navigate to ICA Agentic App Studio
+2. Click "Create an Agentic App"
+3. Name: "Multi-Cloud Intelligence App"
+4. Category: "IT Operations & Cloud Management"
+5. Description: "Agentic AI for multi-cloud cost, resource, and compliance intelligence"
+
+#### Step 3.2: Add MCP Servers
+
+**Multi-Cloud MCP (Infrastructure Data):**
+- Name: "Multi-Cloud MCP"
+- URL: `http://<EC2-PUBLIC-IP>:8000/sse`
+- Transport: Remote (HTTP/S)
+
+**Context Studio MCP (Policies):**
+- Name: "MultiCloudIntel-Policies"
+- URL: (from Context Studio exposure)
+- Authentication: Bearer Token (from Context Studio)
+
+#### Step 3.3: Create Virtual Server
+
+1. Go to "MCP Servers" → "Access MCP Gateway"
+2. Go to "Virtual Server" tab → "Create Virtual Server"
+3. Name: `multi-cloud-mcp-virtual-server`
+4. Select ALL tools from both MCP servers (15 total tools)
+5. Save
+
+#### Step 3.4: Create Agent
+
+```yaml
+# Agent Orchestration YAML
+api-version: aiis.ibm.com/v1alpha1
+kind: agent-orchestration
+metadata:
+  name: multi-cloud-infrastructure-analyst
+  platform: ica
+  framework: strands
+spec:
+  orchestration:
+    type: single
+  models:
+    - name: gpt-5.2
+      provider: ica
+      config:
+        temperature: 0.2
+        max-tokens: 4096
+  tools:
+    # Multi-Cloud MCP (8 tools)
+    - name: get-resource-summary
+      type: mcp
+      tool-id: multi-cloud-mcp-get-resource-summary
+    - name: get-cost-trends
+      type: mcp
+      tool-id: multi-cloud-mcp-get-cost-trends
+    - name: get-cost-anomaly
+      type: mcp
+      tool-id: multi-cloud-mcp-get-cost-anomaly
+    - name: get-new-resources-since
+      type: mcp
+      tool-id: multi-cloud-mcp-get-new-resources-since
+    - name: find-idle-resources
+      type: mcp
+      tool-id: multi-cloud-mcp-find-idle-resources
+    - name: check-compliance
+      type: mcp
+      tool-id: multi-cloud-mcp-check-compliance
+    - name: get-top-expensive-resources
+      type: mcp
+      tool-id: multi-cloud-mcp-get-top-expensive-resources
+    - name: get-budget-health
+      type: mcp
+      tool-id: multi-cloud-mcp-get-budget-health
+    # Context Studio Policies (7 tools)
+    - name: context-policies-vector-query
+      type: mcp
+      tool-id: multicloudintel-policies-context-broker-vector-query
+    - name: context-policies-graph-query
+      type: mcp
+      tool-id: multicloudintel-policies-context-broker-graph-query
+    - name: context-policies-hybrid-query
+      type: mcp
+      tool-id: multicloudintel-policies-context-broker-hybrid-query
+    - name: get-context-metadata
+      type: mcp
+      tool-id: multicloudintel-policies-context-broker-get-context-metadata
+    - name: get-context-schema
+      type: mcp
+      tool-id: multicloudintel-policies-context-broker-get-context-schema
+    - name: context-policies-post-events
+      type: mcp
+      tool-id: multicloudintel-policies-context-broker-post-events
+    - name: context-policies-get-context-id
+      type: mcp
+      tool-id: multicloudintel-policies-context-broker-get-contexts
+  agents:
+    - name: multi-cloud-infra-analyst
+      type: supervisor
+      role: Multi-Cloud Infrastructure Analyst
+      instructions: |
+        You are a production-grade multi-cloud infrastructure analyst.
+        
+        MANDATORY EXECUTION ORDER:
+        1. Query Context Studio FIRST for policies
+        2. Call infrastructure tools with policy values
+        3. Compare results and provide actionable insights
+        
+        FIXED CONTEXT:
+        - context_id: ctx_eeac88f77918
+        - AgentPersona: multi-cloud-infrastructure-analyst
+        - Default AWS region: ap-south-1
+        
+        Always include Tool Trace showing which tools were called.
+      model: gpt-5.2
+```
+
+#### Step 3.5: Create Workflow
+
+1. Go to "Workflow" page → "Create New Workflow"
+2. Name: "MulticloudIntelFlow"
+3. Add components: Chat Input → ICA Agent → Chat Output
+4. Connect the components
+5. Save
+
+### Phase 4: Testing
+
+#### Step 4.1: Test in ICA Playground
+
+Ask these questions in sequence:
+
+```bash
+# Test 1: Policy Retrieval
+"hi"
+
+# Test 2: Resource Listing
+"List all resources"
+
+# Test 3: Idle Detection
+"Find idle resources"
+
+# Test 4: Compliance Check
+"Check compliance"
+```
+
+#### Step 4.2: Expected Results
+
+| Query | Expected Response |
+|-------|-------------------|
+| "hi" | Agent introduces capabilities |
+| "List all resources" | Returns resources from configured cloud providers |
+| "Find idle resources" | Returns idle instances with CPU utilization metrics |
+| "Check compliance" | Returns tagging and encryption violations across clouds |
+
+**Note**: Results shown are from AWS testing. With Azure/GCP credentials configured, the agent will query all three cloud providers simultaneously.
+
+## The 8 MCP Tools
+
+| # | Tool Name | Description | Cloud Support |
+|---|-----------|-------------|---------------|
+| 1 | get-resource-summary | Unified resource inventory across clouds | AWS, Azure, GCP |
+| 2 | get-cost-trends | Cost trends by provider and service | AWS, Azure, GCP |
+| 3 | get-cost-anomaly | Detect statistically significant cost anomalies | AWS, Azure, GCP |
+| 4 | get-new-resources-since | Identify resources created after a given date | AWS, Azure, GCP |
+| 5 | find-idle-resources | Detect idle or underutilized infrastructure | AWS, Azure, GCP |
+| 6 | check-compliance | Check tagging, encryption, public access | AWS, Azure, GCP |
+| 7 | get-top-expensive-resources | Identify highest-cost resources | AWS, Azure, GCP |
+| 8 | get-budget-health | Evaluate actual vs projected spend against budget | AWS, Azure, GCP |
+
+**All tools are multi-cloud ready**. The code supports AWS, Azure, and GCP. Currently tested with AWS credentials only.
+
+## Context Studio Policies (8 Files)
+
+| # | Policy File | Purpose |
+|---|-------------|---------|
+| 1 | resource-policy.md | Resource discovery, filtering, tagging rules |
+| 2 | cost-trends-policy.md | Cost analysis standards and reporting |
+| 3 | anomaly-policy.md | Anomaly detection thresholds (20% default) |
+| 4 | new-resource-policy.md | New resource tracking (7-day window) |
+| 5 | idle-resource-policy.md | Idle definitions (CPU <5% for 14 days) |
+| 6 | compliance-policy.md | Mandatory tags, encryption, access rules |
+| 7 | expensive-resource-policy.md | Cost threshold definitions (>$500/month) |
+| 8 | budget-policy.md | Budget allocation and alerting (80%/100%) |
+
+## Project Structure
+
+```
+MultiCloudInfraIntel/
+├── mcp_server.py              # Main MCP server with 8 tools
+├── requirements.txt           # Python dependencies
+├── config.yaml                # Configuration file
+├── policies/                  # 8 policy markdown files for Context Studio
+│   ├── resource-policy.md
+│   ├── cost-trends-policy.md
+│   ├── anomaly-policy.md
+│   ├── new-resource-policy.md
+│   ├── idle-resource-policy.md
+│   ├── compliance-policy.md
+│   ├── expensive-resource-policy.md
+│   └── budget-policy.md
+├── schema/                    # JSON-LD schema for Context Studio
+│   └── multi-cloud-policies.jsonld
+├── tests/                     # Unit and integration tests
+└── docs/                      # Documentation
+```
+
+## Performance Metrics
+
+| Operation | Response Time |
+|-----------|---------------|
+| Resource listing | ~78 seconds |
+| Idle detection | ~30 seconds |
+| Compliance check | ~267 milliseconds |
+| Policy retrieval | ~22 seconds |
 
 ## Troubleshooting
 
-### No resources returned
-
-- Check cloud credentials are configured correctly
-- Verify the cloud provider is enabled in config.yaml
-- Check logs for authentication errors
-
-### Cost data not available
-
-- AWS: Ensure Cost Explorer API is enabled
-- Azure: Verify Cost Management permissions
-- GCP: Check Cloud Billing API is enabled
-
-### High API costs
-
-- Increase cache TTL in config.yaml
-- Reduce polling frequency
-- Use resource filters to limit scope
-
-## Development
-
-### Code Style
+### MCP Server not accessible
 
 ```bash
-black mcp_server.py
-flake8 mcp_server.py
-mypy mcp_server.py
+# Check service status
+sudo systemctl status mcp-server
+
+# Check logs
+sudo journalctl -u mcp-server -f
+
+# Verify port is open
+sudo netstat -tlnp | grep 8000
 ```
 
-### Adding New Tools
+### ICA Gateway shows "Invalid Host header"
 
-1. Add method to `MultiCloudIntelligenceServer` class
-2. Register tool with `@mcp.tool()` decorator
-3. Add tests to `tests/test_mcp_server.py`
-4. Update documentation
+```bash
+# Restart with correct host binding
+python mcp_server.py --transport http --port 8000 --host 0.0.0.0
+```
+
+### No resources found from cloud providers
+
+```bash
+# Verify AWS credentials
+aws sts get-caller-identity
+aws ec2 describe-instances --region ap-south-1
+
+# Verify Azure credentials (if configured)
+az account show
+az vm list --output table
+
+# Verify GCP credentials (if configured)
+gcloud auth list
+gcloud compute instances list
+```
+
+### Enabling Multi-Cloud Support
+
+The solution is **fully multi-cloud capable**. To enable Azure and GCP:
+
+1. **Azure Setup**:
+```bash
+# Install Azure CLI
+pip install azure-cli azure-mgmt-compute azure-mgmt-monitor azure-mgmt-costmanagement
+
+# Login and set subscription
+az login
+az account set --subscription <subscription-id>
+```
+
+2. **GCP Setup**:
+```bash
+# Install GCP SDK
+pip install google-cloud-compute google-cloud-monitoring google-cloud-billing
+
+# Authenticate
+gcloud auth application-default login
+gcloud config set project <project-id>
+```
+
+3. **Restart MCP Server**:
+```bash
+sudo systemctl restart mcp-server
+```
+
+The MCP server will automatically detect and query all configured cloud providers.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-Copyright © 2024. All rights reserved.
+Copyright © 2026. All rights reserved.
 
-## Support
+## Contact
 
-For issues, questions, or contributions, please refer to the project repository.
-
-## Version History
-
-- **1.0.0** (2024-01-20): Initial production release
-  - 8 core tools implemented
-  - Multi-cloud support (AWS, Azure, GCP)
-  - Caching and error handling
-  - Comprehensive documentation
+For questions or support, please refer to the project repository or contact the development team.
