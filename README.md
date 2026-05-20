@@ -308,8 +308,7 @@ spec:
         FIXED CONTEXT:
         - context_id: ctx_eeac88f77918
         - AgentPersona: multi-cloud-infrastructure-analyst
-        - Default AWS region: ap-south-1
-        
+               
         Always include Tool Trace showing which tools were called.
       model: gpt-5.2
 ```
