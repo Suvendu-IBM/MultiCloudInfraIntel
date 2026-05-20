@@ -39,7 +39,7 @@ This solution provides natural language querying and automated reasoning across 
              │                      │
              ▼                      ▼
 ┌─────────────────────┐  ┌─────────────────────────────────────────────────┐
-│  Context Studio     │  │             Hosted in EC2 Instance (AWS)                 │
+│  Context Studio     │  │         Hosted MultiCloud MCP  in EC2           │
 │   (IBM Cloud)       │  │  ┌─────────────────────────────────────────────┐│
 │                     │  │  │      MCP Server (Python/FastMCP)            ││
 │ • JSON-LD Schema    │  │  │                                             ││
