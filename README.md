@@ -73,11 +73,11 @@ This solution provides natural language querying and automated reasoning across 
 - IBM Consulting Advantage (ICA) access
 - **Cloud Provider Credentials** (one or more):
   - **AWS**: EC2, Cost Explorer, CloudWatch, Config permissions
-  - **Azure**: Virtual Machines, Cost Management, Monitor, Policy (optional)
-  - **GCP**: Compute Engine, Billing, Cloud Monitoring, Asset Inventory (optional)
+  - **Azure**: Virtual Machines, Cost Management, Monitor, Policy
+  - **GCP**: Compute Engine, Billing, Cloud Monitoring, Asset Inventory
 - Python 3.11+ for local development
 - Git
-- Bob Access to build Custom Multicloud MCP, Schema for context studio, etc.
+- Bob Access
 
 **Note**: The solution is fully multi-cloud capable. Currently tested with AWS credentials. Azure and GCP support is code-ready and can be enabled by adding credentials.
 
