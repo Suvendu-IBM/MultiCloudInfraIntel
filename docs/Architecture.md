@@ -1,534 +1,588 @@
-│  │  • Format: Timestamp - Level - Message                   │    │
-│  │  • Output: stdout, systemd journal                       │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-│  System Metrics:                                                   │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • CPU utilization                                        │    │
-│  │  • Memory usage                                           │    │
-│  │  • Network I/O                                            │    │
-│  │  • Disk I/O                                               │    │
-│  │  • Tool: CloudWatch Agent                                 │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-│  Application Metrics:                                              │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • Request count                                          │    │
-│  │  • Response time                                          │    │
-│  │  • Error rate                                             │    │
-│  │  • Cache hit rate                                         │    │
-│  │  • Tool: Custom metrics + CloudWatch                      │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-│  Tool Trace:                                                       │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • Tool invocation logs                                   │    │
-│  │  • Parameter tracking                                     │    │
-│  │  • Execution time                                         │    │
-│  │  • Success/failure status                                 │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+# Multi-Cloud Infrastructure Intelligence Architecture
+
+## 1. Purpose
+
+This document describes the end-to-end architecture of the Multi-Cloud Infrastructure Intelligence solution. It explains how [`ICA`](README.md), [`Context Studio`](README.md), the custom [`mcp_server.py`](mcp_server.py), cloud-provider APIs, policies, and deployment components work together to provide natural-language infrastructure intelligence across AWS, Azure, and GCP.
+
+It replaces the incomplete architecture draft with a structured reference for solution design, implementation, deployment, and operations.
+
+## 2. Architecture Goals
+
+The architecture is designed to achieve the following goals:
+
+- Provide a unified intelligence layer across AWS, Azure, and GCP
+- Expose infrastructure analysis capabilities through MCP tools
+- Separate runtime data retrieval from policy and governance knowledge
+- Enable natural-language interactions through an ICA-hosted agent
+- Support extensibility for additional policies, tools, and cloud providers
+- Allow practical deployment with current AWS-first validation and multi-cloud-ready code
+
+## 3. Solution Scope
+
+The current repository implements a production-style MCP server in [`mcp_server.py`](mcp_server.py) and a policy knowledge base in [`policies/`](policies/). The broader solution combines:
+
+- **User interaction layer** in ICA Playground / ICA Agentic App Studio
+- **Agent orchestration layer** using an ICA agent and workflow
+- **Policy knowledge layer** hosted in Context Studio
+- **Operational intelligence layer** exposed through the custom MCP server
+- **Cloud integration layer** for AWS, Azure, and GCP APIs
+- **Configuration, testing, and documentation assets** in this repository
+
+The implementation is already multi-cloud by design, while the currently validated path is AWS-first because the repository notes that live testing has primarily been done with AWS credentials.
+
+## 4. High-Level Architecture
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              User / Analyst                                 │
+│                    Natural-language questions in ICA                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                   ICA Agentic App Studio / Playground                       │
+│                                                                              │
+│  Multi-Cloud Infrastructure Analyst Agent                                    │
+│  - interprets user intent                                                    │
+│  - retrieves policy context                                                  │
+│  - invokes MCP tools                                                         │
+│  - synthesizes findings and recommendations                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+                         │                                  │
+                         ▼                                  ▼
+┌───────────────────────────────────┐     ┌───────────────────────────────────┐
+│ Context Studio MCP Exposure       │     │ Multi-Cloud MCP Server            │
+│                                   │     │ [`mcp_server.py`](mcp_server.py)  │
+│ - JSON-LD schema                  │     │ - 8 operational tools             │
+│ - policy markdown documents       │     │ - provider clients                │
+│ - semantic / graph retrieval      │     │ - normalization logic             │
+│ - governance thresholds           │     │ - compliance and cost analysis    │
+└───────────────────────────────────┘     └───────────────────────────────────┘
+                                                          │
+                                                          ▼
+                            ┌────────────────────────────────────────────────┐
+                            │ Cloud Provider APIs                            │
+                            │ - AWS                                          │
+                            │ - Azure                                        │
+                            │ - GCP                                          │
+                            └────────────────────────────────────────────────┘
 ```
+
+## 5. Major Components
+
+### 5.1 ICA User and Agent Layer
+
+The user interacts with the solution through ICA. The agent is configured in ICA Agentic App Studio and acts as the reasoning layer between user intent, policy retrieval, and operational tool execution.
+
+Responsibilities:
+
+- Accept natural-language prompts such as cost, compliance, inventory, and optimization questions
+- Decide when policy context is required before operational analysis
+- Invoke policy MCP tools and infrastructure MCP tools in the correct sequence
+- Generate concise findings, root-cause explanations, and recommended actions
+- Present a unified answer instead of raw API responses
+
+This layer is described in [`README.md`](README.md) and summarized in [`docs/PROJECT_SUMMARY.md`](docs/PROJECT_SUMMARY.md).
+
+### 5.2 Context Studio Policy Layer
+
+Context Studio stores governance and operating policies as structured knowledge. The repository contains the source policy content under [`policies/`](policies/) and the JSON-LD schema in [`schema/policies.jsonld`](schema/policies.jsonld).
+
+Responsibilities:
+
+- Store policy definitions for cost trends, anomalies, compliance, budgets, and idle resources
+- Provide retrievable business and governance context to the ICA agent
+- Maintain semantic consistency through the JSON-LD schema
+- Support vector, graph, or hybrid policy lookups before runtime analysis
+
+Key repository assets:
+
+- [`policies/resource-policy.md`](policies/resource-policy.md)
+- [`policies/cost-trends-policy.md`](policies/cost-trends-policy.md)
+- [`policies/anomaly-policy.md`](policies/anomaly-policy.md)
+- [`policies/new-resource-policy.md`](policies/new-resource-policy.md)
+- [`policies/idle-resource-policy.md`](policies/idle-resource-policy.md)
+- [`policies/compliance-policy.md`](policies/compliance-policy.md)
+- [`policies/expensive-resource-policy.md`](policies/expensive-resource-policy.md)
+- [`policies/budget-policy.md`](policies/budget-policy.md)
+- [`schema/policies.jsonld`](schema/policies.jsonld)
+
+### 5.3 Multi-Cloud MCP Server Layer
+
+The custom MCP server is implemented in [`mcp_server.py`](mcp_server.py). It is the operational core of the solution and exposes the infrastructure intelligence tools consumed by the ICA agent.
+
+Responsibilities:
+
+- Host MCP endpoints over HTTP/SSE
+- Connect to supported cloud providers
+- Normalize provider-specific resource and cost data into a common shape
+- Execute inventory, trend, anomaly, compliance, idle-resource, and budget analyses
+- Return structured results for agent consumption
+
+This layer is configuration-driven through [`config.yaml`](config.yaml) and environment variables.
+
+### 5.4 Cloud Provider Integration Layer
+
+The MCP server integrates with three cloud ecosystems:
+
+- **AWS** using [`boto3`](mcp_server.py:43)
+- **Azure** using Azure management SDKs such as [`DefaultAzureCredential`](mcp_server.py:51) and related clients
+- **GCP** using Google Cloud Python clients such as [`compute_v1`](mcp_server.py:62)
+
+Responsibilities:
+
+- Authenticate to cloud accounts
+- Fetch runtime resource metadata
+- Query usage, billing, monitoring, and governance sources
+- Return provider-specific details to server-side normalization logic
+
+### 5.5 Configuration Layer
+
+Configuration is managed by the [`Config`](mcp_server.py:194) class in [`mcp_server.py`](mcp_server.py). Default values are loaded from [`config.yaml`](config.yaml) when available, with environment-variable fallback for secrets and provider settings.
+
+Configuration areas include:
+
+- Server port, timeout, logging, cache TTL
+- Enabled cloud providers and regions
+- Azure and GCP credential references
+- Budget defaults and alert thresholds
+- Compliance policy defaults
+- Monitoring thresholds for idle detection and anomaly detection
+
+### 5.6 Documentation and Testing Layer
+
+The repository also contains operational and validation assets that support the architecture:
+
+- [`docs/IMPLEMENTATION_GUIDE.md`](docs/IMPLEMENTATION_GUIDE.md)
+- [`docs/LOCAL_TESTING.md`](docs/LOCAL_TESTING.md)
+- [`docs/PROJECT_SUMMARY.md`](docs/PROJECT_SUMMARY.md)
+- [`tests/test_mcp_server.py`](tests/test_mcp_server.py)
+- [`tests/test_integration.py`](tests/test_integration.py)
+- [`tests/validate_tools.py`](tests/validate_tools.py)
+- [`scripts/test_aws_connection.py`](scripts/test_aws_connection.py)
+- [`scripts/test_tools_simple.py`](scripts/test_tools_simple.py)
+
+## 6. Runtime Interaction Model
+
+### 6.1 End-to-End Request Flow
+
+A typical request follows this sequence:
+
+1. User asks a natural-language question in ICA.
+2. ICA agent interprets the intent.
+3. Agent retrieves relevant policy context from Context Studio.
+4. Agent invokes one or more MCP tools from the custom server.
+5. MCP server authenticates to relevant cloud providers.
+6. Cloud-provider data is collected and normalized.
+7. Tool results are returned to the agent.
+8. Agent combines operational evidence with policy context.
+9. Final answer is generated with findings, rationale, and recommendations.
+
+### 6.2 Logical Sequence Diagram
+
+```text
+User
+  │
+  │ "Find idle resources across all clouds"
+  ▼
+ICA Agent
+  │
+  ├── query Context Studio MCP for idle-resource policy
+  │
+  ├── invoke MCP tool: find-idle-resources
+  │
+  ▼
+Multi-Cloud MCP Server
+  │
+  ├── query AWS / Azure / GCP monitoring and inventory APIs
+  ├── apply configured thresholds
+  ├── normalize and rank idle candidates
+  │
+  ▼
+ICA Agent
+  │
+  ├── combine policy + runtime evidence
+  └── present savings estimate and remediation options
+  ▼
+User
+```
+
+## 7. MCP Tool Architecture
+
+The solution exposes 8 operational tools through the custom MCP server. These are the primary runtime interfaces used by the ICA agent.
+
+| Tool | Purpose | Typical Output |
+|------|---------|----------------|
+| `get-resource-summary` | Unified inventory across clouds | Resource counts, breakdowns, normalized resource list |
+| `get-cost-trends` | Historical spend analysis | Time-series cost by provider/service |
+| `get-cost-anomaly` | Cost spike detection | Anomalous services, dates, deviations |
+| `get-new-resources-since` | Change tracking | Recently created resources |
+| `find-idle-resources` | Waste detection | Underutilized resources and savings estimates |
+| `check-compliance` | Governance validation | Violations, severities, remediation guidance |
+| `get-top-expensive-resources` | Cost hotspot analysis | High-cost resources ranked by spend |
+| `get-budget-health` | Budget status and forecast | Budget consumed, projected spend, recommendations |
+
+These tool definitions are referenced in [`README.md`](README.md) and implemented in [`mcp_server.py`](mcp_server.py).
+
+## 8. Policy Architecture
+
+The policy layer is intentionally separated from the operational tool layer.
+
+### 8.1 Why Policies Are Externalized
+
+Separating policies from code provides:
+
+- Easier updates to thresholds and governance logic
+- Reusable knowledge for multiple workflows
+- Better explainability because answers can cite policy intent
+- Lower operational risk than embedding every rule in code
+- A path to non-developer policy maintenance in Context Studio
+
+### 8.2 Policy Categories in This Repository
+
+The repository contains policy documents for:
+
+- Resource discovery and filtering
+- Cost trend analysis
+- Cost anomaly thresholds
+- New resource tracking windows
+- Idle resource thresholds
+- Compliance rules for tags, encryption, and access
+- Expensive resource thresholds
+- Budget alert thresholds
+
+### 8.3 Policy-to-Tool Mapping
+
+| Policy Document | Primary Runtime Tool(s) |
+|----------------|-------------------------|
+| [`policies/resource-policy.md`](policies/resource-policy.md) | `get-resource-summary` |
+| [`policies/cost-trends-policy.md`](policies/cost-trends-policy.md) | `get-cost-trends` |
+| [`policies/anomaly-policy.md`](policies/anomaly-policy.md) | `get-cost-anomaly` |
+| [`policies/new-resource-policy.md`](policies/new-resource-policy.md) | `get-new-resources-since` |
+| [`policies/idle-resource-policy.md`](policies/idle-resource-policy.md) | `find-idle-resources` |
+| [`policies/compliance-policy.md`](policies/compliance-policy.md) | `check-compliance` |
+| [`policies/expensive-resource-policy.md`](policies/expensive-resource-policy.md) | `get-top-expensive-resources` |
+| [`policies/budget-policy.md`](policies/budget-policy.md) | `get-budget-health` |
+
+## 9. Data Architecture
+
+### 9.1 Core Data Normalization
+
+The MCP server normalizes provider-specific data into shared Python data structures. The visible examples include:
+
+- [`ResourceSummary`](mcp_server.py:100)
+- [`CostTrend`](mcp_server.py:125)
+- [`ComplianceViolation`](mcp_server.py:144)
+- [`BudgetHealth`](mcp_server.py:165)
+
+This normalization is critical because AWS, Azure, and GCP each return different payload structures, terminology, and service taxonomies.
+
+### 9.2 Normalized Data Characteristics
+
+Normalized objects typically standardize:
+
+- resource identifiers
+- provider names
+- service or resource type
+- region or location
+- lifecycle state
+- creation timestamps
+- tags or labels
+- recommendations and severity metadata
+
+### 9.3 Control and Knowledge Data
+
+In addition to operational data, the architecture manages:
+
+- policy content in markdown
+- JSON-LD schema definitions
+- configuration values in [`config.yaml`](config.yaml)
+- environment-based credentials
+- logs and runtime diagnostics
+
+## 10. Deployment Architecture
+
+### 10.1 Current Deployment Model
+
+The documented deployment model hosts the custom MCP server on an AWS EC2 instance while ICA and Context Studio remain managed platform components.
+
+```text
+┌───────────────────────────┐
+│ ICA / Context Studio      │
+│ Managed IBM platform      │
+└─────────────┬─────────────┘
+              │
+              │ MCP over HTTP/SSE
+              ▼
+┌───────────────────────────┐
+│ AWS EC2 Instance          │
+│ Multi-Cloud MCP Server    │
+│ Python + FastMCP          │
+└─────────────┬─────────────┘
+              │
+              ├──────────────► AWS APIs
+              ├──────────────► Azure APIs
+              └──────────────► GCP APIs
+```
+
+### 10.2 Runtime Hosting Responsibilities
+
+The EC2-hosted MCP runtime is responsible for:
+
+- running the Python process
+- exposing the MCP endpoint
+- holding cloud SDK dependencies
+- managing credential access
+- logging runtime activity
+- handling tool execution requests
+
+### 10.3 Service Management
+
+The implementation guide documents a systemd-based service model for the MCP server in [`docs/IMPLEMENTATION_GUIDE.md`](docs/IMPLEMENTATION_GUIDE.md). That design supports:
+
+- automatic restart on failure
+- boot-time startup
+- standard Linux service observability
+- compatibility with lightweight single-instance deployments
+
+### 10.4 Alternative Future Hosting
+
+The broader roadmap in project documents suggests later movement toward more production-ready managed hosting options. This may include:
+
+- IBM Cloud Code Engine
+- container-based deployment
+- stronger isolation for secrets and traffic management
+- scalable stateless replicas behind a load balancer
+
+## 11. Security Architecture
+
+### 11.1 Security Principles
+
+The solution should operate with the following architectural principles:
+
+- least-privilege access to cloud-provider APIs
+- separation of secrets from source code
+- externalized policy management
+- auditable operational logs
+- constrained public exposure of the MCP endpoint
+- environment-specific configuration
+
+### 11.2 Credential Handling
+
+The repository architecture shows that credentials are expected through provider-native methods and environment variables rather than being hardcoded in source:
+
+- AWS credentials via local AWS configuration / IAM role
+- Azure values from environment variables such as [`AZURE_SUBSCRIPTION_ID`](mcp_server.py:229)
+- GCP values from environment variables such as [`GCP_PROJECT_ID`](mcp_server.py:236)
+
+### 11.3 Recommended Security Controls
+
+For production use, the architecture should include:
+
+- IAM role-based access for the EC2 host
+- HTTPS termination in front of MCP endpoints
+- network restrictions for inbound access
+- secret storage outside plaintext files
+- audit logging and retention controls
+- controlled bearer-token handling for Context Studio connections
+
+## 12. Scalability and Performance Architecture
+
+### 12.1 Performance Characteristics
+
+The project documents currently report approximate operational timings in [`README.md`](README.md) and [`docs/PROJECT_SUMMARY.md`](docs/PROJECT_SUMMARY.md):
+
+- resource listing around 78 seconds
+- idle detection around 30 seconds
+- compliance checks around 267 milliseconds
+- policy retrieval around 22 seconds
+
+These values reflect current implementation behavior and should be treated as practical benchmarks, not guaranteed SLAs.
+
+### 12.2 Scalability Considerations
+
+The architecture is designed to scale functionally before it scales operationally:
+
+- new tools can be added to the MCP server
+- new policies can be added to Context Studio
+- more cloud accounts can be onboarded through credentials and config
+- providers can be queried independently and aggregated centrally
+
+Operational scaling opportunities include:
+
+- parallel provider queries
+- asynchronous tool execution
+- response caching
+- stateless horizontal scaling of the MCP server
+- splitting high-latency cost-analysis workflows from lighter inventory queries
+
+### 12.3 Bottlenecks to Watch
+
+Potential bottlenecks include:
+
+- cloud API rate limits
+- latency of cost and monitoring APIs
+- serialized provider calls
+- large account inventories
+- token/context overhead in agent responses
+
+## 13. Resilience and Error Handling
+
+### 13.1 Error Domains
+
+The architecture must handle failures across multiple layers:
+
+- cloud authentication failures
+- cloud API throttling or timeouts
+- partial provider availability
+- policy retrieval failures
+- invalid tool parameters
+- MCP transport issues
+- agent orchestration failures
+
+### 13.2 Resilience Strategy
+
+A resilient implementation should aim for:
+
+- partial results when one provider fails
+- retriable handling of transient provider errors
+- clear validation errors for bad input
+- logging of tool execution failures
+- fallbacks when policy retrieval is unavailable
+- bounded request timeouts and safe defaults
+
+The source already includes timeout, monitoring, and configuration constructs in [`Config`](mcp_server.py:194), which support this direction.
+
+## 14. Observability Architecture
+
+### 14.1 Logging
+
+The MCP server initializes Python logging using [`logging.basicConfig()`](mcp_server.py:71). At minimum, the architecture supports:
+
+- application log emission
+- error tracking
+- startup/runtime diagnostics
+- operational inspection through service logs when hosted on Linux
+
+### 14.2 Recommended Telemetry
+
+A production-quality observability design should include:
+
+- request-level tool invocation logs
+- tool latency metrics
+- cloud-provider error counts
+- cache hit/miss visibility
+- authentication failure monitoring
+- infrastructure host metrics
+- user query tracing across policy and tool calls
+
+### 14.3 Tool Trace Visibility
+
+The ICA agent design in [`README.md`](README.md) emphasizes showing a tool trace to the user. Architecturally, this improves:
+
+- explainability
+- debugging
+- auditability
+- trust in AI-generated infrastructure findings
+
+## 15. Example Workflows
+
+### 15.1 Cost Spike Investigation
+
+1. User asks why cloud cost increased.
+2. Agent retrieves anomaly policy from Context Studio.
+3. Agent invokes `get-cost-anomaly`.
+4. Agent may invoke `get-new-resources-since` and `get-top-expensive-resources`.
+5. MCP server correlates cost changes with recent infrastructure changes.
+6. Agent returns root cause and remediation suggestions.
+
+### 15.2 Idle Resource Optimization
+
+1. User asks for cost-saving opportunities.
+2. Agent retrieves idle-resource policy.
+3. Agent invokes `find-idle-resources`.
+4. Optional follow-up calls check budget or ownership context.
+5. Agent returns prioritized savings opportunities.
+
+### 15.3 Compliance Review
+
+1. User asks for compliance posture.
+2. Agent retrieves compliance policy.
+3. Agent invokes `check-compliance`.
+4. MCP server evaluates tags, encryption, and exposure conditions.
+5. Agent summarizes violations by severity and remediation path.
+
+## 16. Repository-to-Architecture Mapping
+
+| Repository Asset | Architectural Role |
+|------------------|--------------------|
+| [`mcp_server.py`](mcp_server.py) | Core MCP runtime, tool host, provider integration, normalization |
+| [`config.yaml`](config.yaml) | Runtime defaults and operational configuration |
+| [`policies/`](policies/) | Business and governance knowledge base |
+| [`schema/policies.jsonld`](schema/policies.jsonld) | Structured schema for policy semantics |
+| [`README.md`](README.md) | Solution overview, setup, tool inventory, deployment narrative |
+| [`docs/IMPLEMENTATION_GUIDE.md`](docs/IMPLEMENTATION_GUIDE.md) | Deployment and integration steps |
+| [`docs/PROJECT_SUMMARY.md`](docs/PROJECT_SUMMARY.md) | Executive summary and value framing |
+| [`tests/`](tests/) | Validation of MCP behavior and integrations |
+| [`scripts/`](scripts/) | Local testing and cloud connectivity support |
+
+## 17. Current State and Gaps
+
+### 17.1 What Is Already Implemented
+
+The repository clearly provides:
+
+- a substantial custom MCP server implementation
+- multi-cloud-aware SDK integrations
+- configuration defaults for AWS, Azure, and GCP
+- policy files for major use cases
+- implementation and local testing guides
+- tests and helper scripts
+- ICA/Context Studio integration guidance
+
+### 17.2 What Remains Environment-Dependent
+
+Some architecture elements are designed but depend on deployment configuration rather than code alone:
+
+- live Azure credential setup
+- live GCP credential setup
+- ICA-side agent and workflow provisioning
+- Context Studio publication and MCP exposure
+- production-grade ingress, TLS, and secret management
+- runtime scaling beyond a single host
+
+## 18. Architectural Strengths
+
+This solution’s architecture is strong in the following ways:
+
+- **Clear separation of concerns** between policy knowledge and runtime cloud analysis
+- **Provider abstraction** through normalized tool outputs
+- **Practical implementation path** with current AWS-first deployment guidance
+- **Extensibility** for new tools, policies, and cloud providers
+- **AI-friendly integration** through MCP and ICA orchestration
+- **Governance-aware design** by retrieving business rules before analysis
+
+## 19. Recommended Next Architecture Improvements
+
+To make the architecture more production-ready, the next improvements should be:
+
+1. Add HTTPS and authenticated ingress in front of the MCP server
+2. Introduce structured telemetry and request correlation IDs
+3. Implement stronger caching for repeated cost and inventory queries
+4. Parallelize provider-specific fetches where safe
+5. Containerize the MCP runtime for easier deployment portability
+6. Add explicit architecture diagrams for security and network topology
+7. Expand testing for Azure and GCP live integrations
+8. Formalize SLOs for high-latency operations
+
+## 20. Conclusion
+
+The Multi-Cloud Infrastructure Intelligence architecture combines an ICA-hosted reasoning agent, a Context Studio policy knowledge layer, and a custom operational MCP server to deliver unified cloud intelligence across AWS, Azure, and GCP.
+
+The repository’s strongest architectural pattern is the separation between **policy retrieval** and **runtime infrastructure analysis**. That design enables explainable, governable, and extensible natural-language operations for cost optimization, compliance monitoring, inventory visibility, and infrastructure investigation.
 
 ---
-
-## 10. Data Models
-
-### 10.1 Core Data Structures
-
-```python
-# Cloud Resource Model
-@dataclass
-class CloudResource:
-    resource_id: str          # Unique identifier
-    provider: str             # aws, azure, gcp
-    type: str                 # ec2_instance, vm, compute_instance
-    region: str               # Region/zone
-    state: str                # running, stopped, etc.
-    created_time: datetime    # Creation timestamp
-    tags: Dict[str, str]      # Resource tags
-    cost_per_month: float     # Estimated monthly cost
-    metadata: Dict[str, Any]  # Provider-specific data
-
-# Idle Resource Model
-@dataclass
-class IdleResource:
-    resource: CloudResource
-    cpu_avg: float            # Average CPU utilization
-    lookback_days: int        # Analysis period
-    estimated_savings: float  # Monthly savings if stopped
-    recommendation: str       # Action recommendation
-
-# Compliance Violation Model
-@dataclass
-class ComplianceViolation:
-    resource: CloudResource
-    rule_type: str            # tagging, encryption, public_access
-    severity: str             # critical, high, medium, low
-    description: str          # Violation details
-    remediation: str          # How to fix
-
-# Cost Anomaly Model
-@dataclass
-class CostAnomaly:
-    provider: str
-    service: str
-    date: datetime
-    actual_cost: float
-    expected_cost: float
-    deviation_percent: float
-    severity: str
-```
-
-### 10.2 Policy Schema (JSON-LD)
-
-```json
-{
-  "@context": {
-    "@vocab": "https://schema.org/",
-    "multicloud": "https://multicloud.ibm.com/schema/"
-  },
-  "@graph": [
-    {
-      "@type": "multicloud:IdleResourcePolicy",
-      "@id": "multicloud:idle-resource-policy",
-      "cpuThresholdPercent": 5,
-      "lookbackDays": 14,
-      "estimateSavings": true
-    },
-    {
-      "@type": "multicloud:CostAnomalyPolicy",
-      "@id": "multicloud:cost-anomaly-policy",
-      "thresholdPercent": 20,
-      "lookbackDays": 30
-    },
-    {
-      "@type": "multicloud:CompliancePolicy",
-      "@id": "multicloud:compliance-policy",
-      "mandatoryTags": ["owner", "cost-center", "environment"],
-      "encryptionRequired": true,
-      "publicAccessAllowed": false
-    },
-    {
-      "@type": "multicloud:BudgetPolicy",
-      "@id": "multicloud:budget-policy",
-      "warningThresholdPercent": 80,
-      "criticalThresholdPercent": 100
-    }
-  ]
-}
-```
-
----
-
-## 11. API Specifications
-
-### 11.1 MCP Tool Specifications
-
-#### Tool 1: get-resource-summary
-
-**Description:** Get unified resource inventory across all cloud providers
-
-**Parameters:**
-```json
-{
-  "providers": ["aws", "azure", "gcp"],  // Optional, defaults to all
-  "resource_types": ["compute", "storage", "database"],  // Optional
-  "regions": ["ap-south-1", "eastus", "us-central1"]  // Optional
-}
-```
-
-**Response:**
-```json
-{
-  "total_resources": 150,
-  "by_provider": {
-    "aws": 100,
-    "azure": 30,
-    "gcp": 20
-  },
-  "by_type": {
-    "compute": 80,
-    "storage": 50,
-    "database": 20
-  },
-  "resources": [
-    {
-      "resource_id": "i-1234567890abcdef0",
-      "provider": "aws",
-      "type": "ec2_instance",
-      "region": "ap-south-1",
-      "state": "running",
-      "tags": {"owner": "team-a", "environment": "production"}
-    }
-  ]
-}
-```
-
-#### Tool 2: find-idle-resources
-
-**Description:** Identify underutilized resources with savings estimates
-
-**Parameters:**
-```json
-{
-  "cpu_threshold": 5,        // CPU threshold percentage
-  "lookback_days": 14,       // Days to analyze
-  "providers": ["aws"]       // Optional
-}
-```
-
-**Response:**
-```json
-{
-  "idle_resources": [
-    {
-      "resource_id": "i-1234567890abcdef0",
-      "provider": "aws",
-      "type": "ec2_instance",
-      "cpu_avg": 2.5,
-      "lookback_days": 14,
-      "estimated_savings": 45.00,
-      "recommendation": "Stop or downsize instance"
-    }
-  ],
-  "total_potential_savings": 450.00
-}
-```
-
-#### Tool 3: check-compliance
-
-**Description:** Check compliance against governance policies
-
-**Parameters:**
-```json
-{
-  "rule_types": ["tagging", "encryption", "public_access"],
-  "providers": ["aws", "azure", "gcp"]
-}
-```
-
-**Response:**
-```json
-{
-  "violations": [
-    {
-      "resource_id": "i-1234567890abcdef0",
-      "provider": "aws",
-      "rule_type": "tagging",
-      "severity": "high",
-      "description": "Missing mandatory tag: cost-center",
-      "remediation": "Add cost-center tag to resource"
-    }
-  ],
-  "compliance_score": 85.5,
-  "total_violations": 15
-}
-```
-
----
-
-## 12. Workflow Patterns
-
-### 12.1 Investigation Workflow
-
-```
-User Query: "Why did my AWS costs spike last week?"
-
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Investigation Workflow                           │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  Step 1: Retrieve Cost Anomaly Policy                              │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  Tool: context-broker-vector-query                        │    │
-│  │  Query: "cost anomaly detection policy"                   │    │
-│  │  Result: threshold=20%, lookback=30 days                  │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                              │                                     │
-│  Step 2: Detect Cost Anomalies                                     │
-│  ┌───────────────────────────▼───────────────────────────────┐    │
-│  │  Tool: get-cost-anomaly                                   │    │
-│  │  Parameters: {                                            │    │
-│  │    provider: "aws",                                       │    │
-│  │    threshold: 20,                                         │    │
-│  │    lookback_days: 30                                      │    │
-│  │  }                                                        │    │
-│  │  Result: Spike detected on 2026-05-15 (+45%)             │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                              │                                     │
-│  Step 3: Identify New Resources                                    │
-│  ┌───────────────────────────▼───────────────────────────────┐    │
-│  │  Tool: get-new-resources-since                            │    │
-│  │  Parameters: {                                            │    │
-│  │    since_date: "2026-05-14",                              │    │
-│  │    provider: "aws"                                        │    │
-│  │  }                                                        │    │
-│  │  Result: 5 new EC2 instances created                      │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                              │                                     │
-│  Step 4: Analyze Resource Costs                                    │
-│  ┌───────────────────────────▼───────────────────────────────┐    │
-│  │  Tool: get-top-expensive-resources                        │    │
-│  │  Parameters: {                                            │    │
-│  │    provider: "aws",                                       │    │
-│  │    top_n: 10                                              │    │
-│  │  }                                                        │    │
-│  │  Result: New instances account for $450/day              │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                              │                                     │
-│  Step 5: Generate Root Cause Analysis                              │
-│  ┌───────────────────────────▼───────────────────────────────┐    │
-│  │  Agent synthesizes findings:                              │    │
-│  │                                                            │    │
-│  │  "Cost spike caused by 5 new m5.2xlarge instances        │    │
-│  │   launched on 2026-05-15. These instances are running    │    │
-│  │   24/7 and account for $450/day ($13,500/month).         │    │
-│  │                                                            │    │
-│  │   Recommendations:                                        │    │
-│  │   1. Review if all instances are necessary               │    │
-│  │   2. Consider Reserved Instances for 40% savings         │    │
-│  │   3. Implement auto-stop for non-production instances"   │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### 12.2 Optimization Workflow
-
-```
-User Query: "Find opportunities to reduce cloud costs"
-
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Optimization Workflow                            │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  Step 1: Find Idle Resources                                       │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  Tool: find-idle-resources                                │    │
-│  │  Result: 12 idle instances, $540/month savings            │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                              │                                     │
-│  Step 2: Check Compliance                                          │
-│  ┌───────────────────────────▼───────────────────────────────┐    │
-│  │  Tool: check-compliance                                   │    │
-│  │  Result: 8 untagged resources, 3 unencrypted volumes      │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                              │                                     │
-│  Step 3: Analyze Budget Health                                     │
-│  ┌───────────────────────────▼───────────────────────────────┐    │
-│  │  Tool: get-budget-health                                  │    │
-│  │  Result: 95% of budget consumed, 5 days remaining         │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                              │                                     │
-│  Step 4: Generate Optimization Plan                                │
-│  ┌───────────────────────────▼───────────────────────────────┐    │
-│  │  Agent creates prioritized action plan:                   │    │
-│  │                                                            │    │
-│  │  Priority 1 (Immediate - $540/month savings):             │    │
-│  │  • Stop 12 idle EC2 instances                             │    │
-│  │                                                            │    │
-│  │  Priority 2 (This week - Risk mitigation):                │    │
-│  │  • Tag 8 untagged resources for cost allocation           │    │
-│  │  • Enable encryption on 3 volumes                         │    │
-│  │                                                            │    │
-│  │  Priority 3 (This month - Long-term savings):             │    │
-│  │  • Purchase Reserved Instances (40% savings)              │    │
-│  │  • Implement auto-scaling policies                        │    │
-│  │  • Set up budget alerts at 80% threshold                  │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 13. Error Handling & Resilience
-
-### 13.1 Error Handling Strategy
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    Error Handling Architecture                      │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  Level 1: Cloud Provider Errors                                    │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • NoCredentialsError → Return empty result + warning     │    │
-│  │  • ClientError → Retry with exponential backoff           │    │
-│  │  • Timeout → Partial results from available providers     │    │
-│  │  • Rate Limiting → Queue and retry                        │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-│  Level 2: MCP Server Errors                                        │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • Invalid Parameters → Return validation error           │    │
-│  │  • Tool Execution Failure → Log and return error          │    │
-│  │  • Cache Miss → Fetch from source                         │    │
-│  │  • Memory Error → Clear cache and retry                   │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-│  Level 3: Agent Errors                                             │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • Tool Not Found → Suggest alternative tools             │    │
-│  │  • Timeout → Return partial results                       │    │
-│  │  • LLM Error → Retry with simplified prompt               │    │
-│  │  • Context Overflow → Summarize and retry                 │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-│  Level 4: User Errors                                              │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • Ambiguous Query → Ask clarifying questions             │    │
-│  │  • Unsupported Operation → Explain limitations            │    │
-│  │  • Invalid Date Range → Suggest valid range               │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### 13.2 Retry Logic
-
-```python
-# Exponential Backoff with Jitter
-def retry_with_backoff(func, max_retries=3):
-    for attempt in range(max_retries):
-        try:
-            return func()
-        except ClientError as e:
-            if attempt == max_retries - 1:
-                raise
-            wait_time = (2 ** attempt) + random.uniform(0, 1)
-            time.sleep(wait_time)
-```
-
----
-
-## 14. Future Enhancements
-
-### 14.1 Roadmap
-
-| Phase | Timeline | Features |
-|-------|----------|----------|
-| **Phase 1** | Q2 2026 | Current implementation (AWS tested) |
-| **Phase 2** | Q3 2026 | Azure & GCP integration testing |
-| **Phase 3** | Q4 2026 | Auto-remediation workflows |
-| **Phase 4** | Q1 2027 | Predictive analytics & ML models |
-| **Phase 5** | Q2 2027 | Multi-tenant support |
-
-### 14.2 Planned Features
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Future Enhancements                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  Auto-Remediation:                                                 │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • Auto-stop idle resources (with approval)               │    │
-│  │  • Auto-tag untagged resources                            │    │
-│  │  • Auto-enable encryption                                 │    │
-│  │  • Auto-resize over-provisioned instances                 │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-│  Predictive Analytics:                                             │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • Cost forecasting (ML-based)                            │    │
-│  │  • Capacity planning                                      │    │
-│  │  • Anomaly prediction                                     │    │
-│  │  • Resource lifecycle optimization                        │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-│  Advanced Reporting:                                               │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • Executive dashboards                                   │    │
-│  │  • Scheduled reports (email/Slack)                        │    │
-│  │  • Custom KPI tracking                                    │    │
-│  │  • Trend analysis                                         │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-│  Multi-Tenancy:                                                    │
-│  ┌───────────────────────────────────────────────────────────┐    │
-│  │  • Team-based access control                              │    │
-│  │  • Separate budgets per team                              │    │
-│  │  • Custom policies per team                               │    │
-│  │  • Audit trails                                           │    │
-│  └───────────────────────────────────────────────────────────┘    │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 15. Conclusion
-
-### 15.1 Architecture Summary
-
-The Multi-Cloud Infrastructure Intelligence solution provides a comprehensive, production-grade architecture for unified cloud management across AWS, Azure, and GCP. Key architectural strengths include:
-
-1. **Modular Design**: Clear separation of concerns across layers
-2. **Scalability**: Designed for horizontal scaling from day one
-3. **Extensibility**: Easy to add new cloud providers and tools
-4. **Resilience**: Comprehensive error handling and retry logic
-5. **Performance**: Intelligent caching and parallel execution
-6. **Security**: Multi-layer security with least-privilege access
-
-### 15.2 Key Metrics
-
-| Metric | Value |
-|--------|-------|
-| **Total Components** | 4 (ICA, Context Studio, MCP Server, Cloud APIs) |
-| **Total Tools** | 15 (8 data + 7 policy) |
-| **Supported Clouds** | 3 (AWS, Azure, GCP) |
-| **Lines of Code** | 2000+ (MCP Server) |
-| **Policy Documents** | 8 |
-| **Response Time** | <30 seconds average |
-| **Uptime Target** | 99.9% |
-
-### 15.3 Business Impact
-
-- **Cost Savings**: $142,000 annually (estimated)
-- **Time Savings**: 95% reduction in investigation time (4-6 hours → 2-5 minutes)
-- **Operational Efficiency**: 75% reduction in FTE requirements (2 → 0.5)
-- **Compliance**: Real-time continuous monitoring vs monthly checks
-- **User Experience**: Natural language interface vs 3 separate consoles
-
----
-
-## Appendix
-
-### A. Glossary
-
-| Term | Definition |
-|------|------------|
-| **MCP** | Model Context Protocol - Standard for AI tool integration |
-| **ICA** | IBM Consulting Advantage - Enterprise AI platform |
-| **Context Studio** | IBM's knowledge management and semantic search platform |
-| **Strands** | ICA's agent orchestration framework |
-| **LangGraph** | Workflow orchestration library for multi-step AI tasks |
-| **FastMCP** | Python framework for building MCP servers |
-| **SSE** | Server-Sent Events - HTTP streaming protocol |
-
-### B. References
-
-- [MCP Specification](https://modelcontextprotocol.io/)
-- [IBM Consulting Advantage Documentation](https://www.ibm.com/consulting/advantage)
-- [AWS SDK for Python (Boto3)](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
-- [Azure SDK for Python](https://docs.microsoft.com/en-us/azure/developer/python/)
-- [Google Cloud Python Client](https://cloud.google.com/python/docs/reference)
-
-### C. Contact Information
-
-- **Project Repository**: https://github.com/Suvendu-IBM/MultiCloudInfraIntel
-- **Documentation**: See `/docs` folder
-- **Issues**: GitHub Issues
-- **Version**: 2.0.0
-- **Last Updated**: May 2026
-
----
-
-**Document Version**: 1.0  
-**Created**: May 2026  
-**Author**: Bob (AI Assistant)  
-**Status**: Complete  
-**Classification**: Internal Use
+**Document Version:** 2.0  
+**Last Updated:** May 2026  
+**Status:** Updated and completed  
+**Classification:** Internal Use
