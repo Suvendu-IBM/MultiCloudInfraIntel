@@ -219,7 +219,28 @@ Agent: [Analyzes spend across all clouds]
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        USER INTERFACE (ICA Playground)                      │
+│                    USER INTERFACE — Web Application                         │
+│                                                                             │
+│   Browser  http://localhost:5173                                            │
+│   ┌───────────────────────────────────────────────────────────────────┐    │
+│   │  React + TypeScript (Vite)                                        │    │
+│   │  Cloud selector  │  Chat window  │  Markdown rendering            │    │
+│   └───────────────────────────────────────────────────────────────────┘    │
+│                              │                                              │
+│   FastAPI Backend  http://localhost:8001                                    │
+│   ┌───────────────────────────────────────────────────────────────────┐    │
+│   │  ICAAdapter — context injection + response extraction             │    │
+│   └───────────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                     POST /api/v1/run/<flow-id>   x-api-key
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│               ICA LANGFLOW  (langflow.servicesessentials.ibm.com)           │
+│   ┌───────────────────────────────────────────────────────────────────┐    │
+│   │  MulticloudIntelFlow  (A2A → Strands agent runtime)               │    │
+│   └───────────────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────────────────┘
                                       │
                                       ▼
@@ -526,23 +547,27 @@ spec:
 
 ### Phase 4: Testing
 
-#### Step 4.1: Test in ICA Playground
+#### Step 4.1: Test via Web Application (Recommended)
 
-Ask these questions in sequence:
+Start the webapp and open **http://localhost:5173** (see [Web Application](#web-application) section below for setup).
 
-```bash
+Ask these questions in sequence using the chat interface:
+
+```
 # Test 1: Policy Retrieval
-"hi"
+hi
 
 # Test 2: Resource Listing
-"List all resources"
+List all resources
 
 # Test 3: Idle Detection
-"Find idle resources"
+Find idle resources
 
 # Test 4: Compliance Check
-"Check compliance"
+Check compliance
 ```
+
+> **Alternative:** You can also test directly in the ICA Agentic App Studio sandbox by opening the agent in the playground and sending the same questions.
 
 #### Step 4.2: Expected Results
 
@@ -590,6 +615,9 @@ MultiCloudInfraIntel/
 ├── mcp_server.py              # Main MCP server with 8 tools
 ├── requirements.txt           # Python dependencies
 ├── config.yaml                # Configuration file
+├── .env.example               # Environment variables template
+├── README.md                  # This file
+│
 ├── policies/                  # 8 policy markdown files for Context Studio
 │   ├── resource-policy.md
 │   ├── cost-trends-policy.md
@@ -599,19 +627,58 @@ MultiCloudInfraIntel/
 │   ├── compliance-policy.md
 │   ├── expensive-resource-policy.md
 │   └── budget-policy.md
+│
 ├── schema/                    # JSON-LD schema for Context Studio
 │   └── multi-cloud-policies.jsonld
+│
 ├── tests/                     # Unit and integration tests
-└── docs/                      # Documentation
+│   ├── test_mcp_server.py
+│   ├── test_integration.py
+│   └── validate_tools.py
+│
+├── scripts/                   # Utility and validation scripts
+│   ├── test_aws_connection.py
+│   └── test_tools_simple.py
+│
+├── docs/                      # Documentation
+│   ├── Architecture.md
+│   ├── PROJECT_SUMMARY.md
+│   ├── IMPLEMENTATION_GUIDE.md
+│   └── LOCAL_TESTING.md
+│
+└── webapp/                    # Web Application (React + FastAPI)
+    ├── README.md              # Webapp quick start guide
+    ├── backend/               # Python FastAPI backend
+    │   ├── main.py            # FastAPI server (port 8001)
+    │   ├── ica_adapter.py     # ICA Workflow API adapter
+    │   ├── requirements.txt   # Backend Python dependencies
+    │   └── .env.example       # Backend environment template
+    └── frontend/              # React + TypeScript frontend
+        ├── index.html         # Vite entry point
+        ├── package.json       # Node dependencies
+        ├── vite.config.ts     # Vite config + /api proxy
+        ├── tsconfig.json      # TypeScript strict config
+        └── src/
+            ├── main.tsx       # React 18 entry point
+            ├── App.tsx        # Root component
+            ├── App.css        # Layout + component styles
+            ├── index.css      # CSS reset + variables
+            ├── types.ts       # Shared TypeScript types
+            ├── api/
+            │   └── chat.ts    # API client (axios)
+            └── components/
+                ├── CloudSelector.tsx  # Provider pill buttons
+                ├── ChatWindow.tsx     # Message history
+                └── ChatInput.tsx      # Textarea + Send
 ```
 
 ## Performance Metrics
 
 | Operation | Response Time |
 |-----------|---------------|
-| Resource listing | ~78 seconds |
+| Resource listing | ~28 seconds |
 | Idle detection | ~30 seconds |
-| Compliance check | ~267 milliseconds |
+| Compliance check | ~20 seconds |
 | Policy retrieval | ~22 seconds |
 
 ## Troubleshooting
@@ -698,3 +765,217 @@ Copyright © 2026. All rights reserved.
 ## Contact
 
 For questions or support, please refer to the project repository or contact the development team.
+
+---
+
+## Web Application
+
+A browser-based natural language chat interface for multi-cloud infrastructure intelligence.
+Built with React + TypeScript frontend and Python FastAPI backend, powered by IBM Consulting Advantage ICA Workflow API.
+
+### Architecture
+
+```
+Browser (localhost:5173)
+    ↓ React + TypeScript (Vite)
+    ↓ Cloud selector + Chat UI + Markdown rendering
+
+FastAPI Backend (localhost:8001)
+    ↓ ICAAdapter with authentication handling
+    ↓ Multi-cloud context injection
+
+ICA Workflow API (IBM Consulting Advantage)
+    ↓ MulticloudIntelFlow
+    ↓ ICA Agent with 15 tools
+
+MCP Server (EC2 port 8000)
+    ↓ 8 multi-cloud infrastructure tools
+
+AWS / Azure / GCP
+    ↓ Real-time cloud data
+```
+
+### Prerequisites
+
+- Python 3.11+
+- Node.js 18+
+- ICA Workflow API access
+- Active ICA session credentials
+
+### Quick Start
+
+**Step 1: Configure backend environment**
+
+```bash
+cd webapp/backend
+cp .env.example .env
+```
+
+Edit `.env` and set:
+
+| Variable | Description |
+|---|---|
+| `ICA_WORKFLOW_URL` | Your ICA workflow run URL |
+| `ICA_API_KEY` | Your ICA API key (`sk-` prefix) |
+
+> **Getting the correct values:**
+> - `ICA_WORKFLOW_URL`: `https://langflow.servicesessentials.ibm.com/api/v1/run/<flow-id>`
+>   The flow ID is visible in the Langflow UI URL bar when your flow is open.
+> - `ICA_API_KEY`: The `x-api-key` value from your MCP server configuration JSON
+>   (the value after `"--headers", "x-api-key"` in the `args` array).
+
+**Step 2: Start the backend**
+
+```bash
+cd webapp/backend
+pip install -r requirements.txt
+uvicorn main:app --port 8001 --reload
+```
+
+Expected output:
+
+```
+INFO  PESAMultiCloudIntel Backend starting up
+INFO    Port        : 8001
+INFO    CORS origins: ['*']
+INFO  ICAAdapter initialised successfully.
+INFO  Uvicorn running on http://127.0.0.1:8001
+```
+
+**Step 3: Start the frontend**
+
+Open a new terminal:
+
+```bash
+cd webapp/frontend
+npm install
+npm run dev
+```
+
+Expected output:
+
+```
+  VITE v5.x.x  ready in xxx ms
+  ➜  Local:   http://localhost:5173/
+```
+
+**Step 4: Open the application**
+
+Open browser at: **http://localhost:5173**
+
+### Features
+
+- Natural language queries across cloud providers
+- Cloud provider selector: **All Clouds**, **AWS**, **Azure**, **GCP**
+- Brand colour-coded pill buttons:
+  - All Clouds = purple `#6366f1`
+  - AWS = orange `#f97316`
+  - Azure = blue `#3b82f6`
+  - GCP = red `#ef4444`
+- Markdown rendering for AI responses (tables, code blocks, headers)
+- Three-dot loading indicator during agent processing
+- Error handling with user-friendly messages
+- Auto-scroll to latest response
+- Enter to send, Shift+Enter for new line
+- Auto-resizing textarea (up to 6 lines)
+
+### API Endpoints
+
+Backend runs on port 8001:
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/` | Service information and version |
+| `GET` | `/health` | Health check → `{"status": "ok"}` |
+| `POST` | `/api/chat` | Send question, receive AI answer |
+
+**POST `/api/chat` request:**
+
+```json
+{
+  "question": "Find idle resources",
+  "cloud_provider": "aws"
+}
+```
+
+Valid `cloud_provider` values: `all`, `aws`, `azure`, `gcp`
+
+**Response:**
+
+```json
+{
+  "answer": "AI generated response in markdown...",
+  "cloud_provider": "aws"
+}
+```
+
+**Error responses:**
+
+| Status | Cause |
+|---|---|
+| 422 | Empty question or invalid cloud_provider |
+| 502 | ICA Workflow API returned an error |
+| 500 | Unexpected server error |
+
+### Cloud Context Injection
+
+Before every ICA API call the adapter appends a context sentence to the question:
+
+| Selection | Appended text |
+|---|---|
+| All Clouds | "Analyze across AWS, Azure and GCP." |
+| AWS | "Focus on Amazon Web Services only." |
+| Azure | "Focus on Microsoft Azure only." |
+| GCP | "Focus on Google Cloud Platform only." |
+
+### Project Structure
+
+```
+webapp/
+├── README.md                      Quick start guide
+├── backend/
+│   ├── ica_adapter.py             ICA Workflow API adapter
+│   ├── main.py                    FastAPI server
+│   ├── requirements.txt           Python dependencies
+│   └── .env.example               Environment template
+└── frontend/
+    ├── index.html                 Entry point
+    ├── package.json               Node dependencies
+    ├── vite.config.ts             Vite + proxy config (/api → :8001)
+    ├── tsconfig.json              TypeScript strict config
+    └── src/
+        ├── main.tsx               React 18 entry point
+        ├── App.tsx                Root component (owns all state)
+        ├── App.css                Layout + component styles
+        ├── index.css              CSS reset + variables
+        ├── types.ts               Shared TypeScript types
+        ├── api/
+        │   └── chat.ts            API client (axios + error handling)
+        └── components/
+            ├── CloudSelector.tsx  Cloud provider pill buttons
+            ├── ChatWindow.tsx     Message history + Markdown rendering
+            └── ChatInput.tsx      Auto-resize textarea + Send button
+```
+
+### Environment Variables
+
+`webapp/backend/.env` variables:
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `ICA_WORKFLOW_URL` | ✅ | — | ICA Langflow run endpoint URL |
+| `ICA_API_KEY` | ✅ | — | ICA API key (`sk-` prefix, from MCP config) |
+| `BACKEND_PORT` | ❌ | `8001` | Port shown in startup log |
+| `CORS_ORIGINS` | ❌ | `*` | Comma-separated allowed origins |
+
+### Complete Solution Architecture
+
+The webapp is part of the complete PESAMultiCloudIntel solution:
+
+| Component | Location | Port |
+|---|---|---|
+| MCP Server | EC2 | 8000 |
+| FastAPI Backend | Local | 8001 |
+| React Frontend | Local | 5173 |
+| ICA Agent | IBM Cloud | — |
+| Context Studio | IBM Cloud | — |
