@@ -20,7 +20,7 @@ FastAPI Backend (localhost:8001)
     │  Primary + 3 fallback extraction paths
     │
     │  POST https://langflow.servicesessentials.ibm.com/api/v1/run/<id>
-    │  Authorization: Bearer <ICA_API_KEY>
+    │  x-api-key: <ICA_API_KEY>
     ▼
 ICA Workflow API (IBM Consulting Advantage / Langflow)
     │

@@ -1,219 +1,178 @@
-# Multi-Cloud Infrastructure Intelligence - Complete Agentic AI Solution
+# MultiCloud Intelligence
 
-An end-to-end Agentic AI solution for multi-cloud infrastructure intelligence using IBM Consulting Advantage (ICA), Context Studio, and custom MCP servers.
+> An enterprise-grade Agentic AI solution for unified multi-cloud infrastructure intelligence — powered by IBM Consulting Advantage, Context Studio, and a React + FastAPI web interface.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Problem Statement](#problem-statement)
+- [Solution Overview](#solution-overview)
+- [Key Features](#key-features)
+- [Business Value](#business-value)
+- [Architecture](#architecture)
+- [Technology Stack](#technology-stack)
+- [Repository Structure](#repository-structure)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Deployment](#deployment)
+  - [Phase 1 — Context Studio Setup](#phase-1--context-studio-setup)
+  - [Phase 2 — MCP Server Deployment](#phase-2--mcp-server-deployment)
+  - [Phase 3 — ICA Agent Configuration](#phase-3--ica-agent-configuration)
+  - [Phase 4 — Web Application Setup](#phase-4--web-application-setup)
+- [Testing](#testing)
+- [MCP Tools Reference](#mcp-tools-reference)
+- [Context Studio Policies](#context-studio-policies)
+- [Performance Metrics](#performance-metrics)
+- [Troubleshooting](#troubleshooting)
+- [Multi-Cloud Enablement](#multi-cloud-enablement)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
+---
+
+## Overview
+
+**MultiCloud Intelligence** is an end-to-end Agentic AI platform that gives infrastructure and FinOps teams a single natural language interface to query, analyse, and govern resources across AWS, Azure, and GCP simultaneously.
+
+The solution combines:
+- A **custom MCP server** exposing 8 multi-cloud infrastructure tools
+- An **IBM Context Studio** knowledge graph enforcing governance policies
+- An **ICA Agent** (15 tools, Strands runtime) orchestrated via IBM Consulting Advantage
+- A **React + FastAPI web application** providing a browser-based chat interface
+
+> **Current status**: Fully implemented and tested on AWS. Azure and GCP are code-complete and activate automatically once credentials are supplied.
+
+---
 
 ## Problem Statement
 
-### The Challenge
+Organizations operating across multiple cloud providers face four compounding challenges:
 
-Organizations operating in multi-cloud environments face critical challenges that directly impact their bottom line and operational efficiency:
+**1. Visibility Gap**
+- No unified view of resources, costs, or compliance across AWS, Azure, and GCP
+- Manual aggregation from separate consoles delays decision-making by hours or days
 
-**1. Visibility Gap Across Cloud Providers**
-- Infrastructure teams manage resources across AWS, Azure, and GCP using separate consoles and tools
-- No unified view of resources, costs, and compliance status across all cloud providers
-- Manual effort required to aggregate data from multiple sources leads to delayed decision-making
+**2. Uncontrolled Spend**
+- Idle resources consume 30–40% of cloud budgets ($17.6B wasted industry-wide annually)
+- Cost anomalies are detected weeks after occurrence — too late to prevent overruns
 
-**2. Uncontrolled Cloud Spend**
-- Cloud costs growing 20-30% annually without corresponding business value
-- Idle resources consuming 30-40% of cloud budgets (industry average: $17.6B wasted annually)
-- Cost anomalies detected weeks after occurrence, resulting in budget overruns
-- Lack of proactive budget monitoring and alerting mechanisms
-
-**3. Compliance and Security Risks**
-- Resources deployed without proper tagging, making cost allocation impossible
-- Unencrypted data stores and publicly accessible resources creating security vulnerabilities
-- Manual compliance audits taking days/weeks to complete
-- Regulatory violations discovered during audits rather than prevented proactively
+**3. Compliance & Security Risk**
+- Resources deployed without mandatory tags make cost allocation impossible
+- Manual audits take days or weeks; violations are discovered reactively
+- Average cost of a compliance violation: **$4.24M** *(IBM Security Report)*
 
 **4. Operational Inefficiency**
-- Infrastructure teams spending 60-70% of time on manual reporting and analysis
-- Natural language queries not possible - teams must learn multiple cloud-specific query languages
-- Reactive rather than proactive infrastructure management
-- Siloed knowledge across different cloud platforms
+- Engineers spend 60–70% of time on manual reporting and cloud-specific querying
+- Knowledge is siloed across platforms with no common query language
 
-### Business Impact
-
-- **Financial**: $500K-$2M annual waste per organization due to idle resources and cost anomalies
-- **Operational**: 15-20 hours/week per engineer spent on manual cloud management tasks
-- **Risk**: Average cost of compliance violation: $4.24M (IBM Security Report)
-- **Strategic**: Delayed cloud optimization decisions impacting business agility
-
-### What's Needed
-
-An intelligent, unified solution that:
-- Provides natural language querying across all cloud providers
-- Detects and prevents cost waste proactively
-- Ensures continuous compliance monitoring
-- Automates routine infrastructure analysis tasks
-- Delivers actionable insights, not just raw data
+---
 
 ## Solution Overview
 
-This solution provides natural language querying and automated reasoning across **AWS, Azure, and GCP** for:
-- **Resource Inventory**: Unified view of all cloud resources across multiple providers
-- **Cost Analysis**: Cost trends, anomaly detection, budget tracking
-- **Idle Resource Detection**: Identify waste and estimate savings
-- **Compliance Checking**: Tagging, encryption, and public access validation
+MultiCloud Intelligence replaces manual cloud operations with a conversational AI agent that:
 
+- Queries **AWS, Azure, and GCP simultaneously** from a single interface
+- Applies **governance policies** from a Context Studio knowledge graph on every response
+- Delivers **structured, actionable insights** — not raw API dumps
+- Provides a **browser-based chat UI** accessible to any team member without CLI skills
 
-## Key Benefits & Value Proposition
+### Real-World Use Cases
 
-### Immediate Business Value
+<details>
+<summary><strong>Use Case 1 — Monthly Cost Optimization (15 min vs 4–6 hours)</strong></summary>
 
-**1. Cost Optimization (30-40% Savings)**
-- **Idle Resource Detection**: Automatically identify underutilized resources (CPU <5% for 14 days)
-- **Cost Anomaly Detection**: Real-time alerts on unusual spending patterns (>20% deviation)
-- **Budget Monitoring**: Proactive warnings at 80% and critical alerts at 100% budget utilization
-- **ROI**: Typical savings of $150K-$500K annually for mid-sized cloud deployments
-
-**2. Operational Efficiency (70% Time Reduction)**
-- **Natural Language Queries**: Ask "Find idle resources" instead of writing complex cloud-specific queries
-- **Unified Dashboard**: Single pane of glass for AWS, Azure, and GCP
-- **Automated Analysis**: Reduce manual reporting from 20 hours/week to 6 hours/week
-- **Time-to-Insight**: From days to seconds for infrastructure analysis
-
-**3. Risk Mitigation (100% Compliance Coverage)**
-- **Continuous Monitoring**: Real-time compliance checks across all cloud providers
-- **Proactive Alerts**: Detect violations before audits (tagging, encryption, public access)
-- **Audit Readiness**: Generate compliance reports in seconds, not weeks
-- **Risk Reduction**: Prevent regulatory violations averaging $4.24M per incident
-
-**4. Strategic Advantages**
-- **Agentic AI**: Self-reasoning agent that understands context and policies
-- **Multi-Cloud Native**: True multi-cloud support, not just AWS-centric
-- **Policy-Driven**: Customizable policies through Context Studio knowledge graphs
-- **Scalable**: Handles thousands of resources across multiple cloud accounts
-
-### Competitive Differentiation
-
-| Feature | This Solution | Traditional Tools |
-|---------|---------------|-------------------|
-| Natural Language Queries | ✅ Yes | ❌ No (CLI/API only) |
-| Multi-Cloud Unified View | ✅ AWS, Azure, GCP | ⚠️ Single cloud focus |
-| Agentic AI Reasoning | ✅ Context-aware | ❌ Rule-based only |
-| Policy Knowledge Graph | ✅ Context Studio | ❌ Static configs |
-| Real-time Anomaly Detection | ✅ Statistical analysis | ⚠️ Threshold-based |
-| Deployment Time | ✅ 2-3 hours | ⚠️ Days/weeks |
-
-## Use Cases & Real-World Scenarios
-
-### Use Case 1: Monthly Cost Optimization Review
-**Scenario**: FinOps team needs to identify cost-saving opportunities before month-end.
-
-**Traditional Approach** (4-6 hours):
-1. Log into AWS Cost Explorer, Azure Cost Management, GCP Billing
-2. Export data to Excel, manually correlate resources
-3. Write custom scripts to identify idle resources
-4. Generate PowerPoint report for management
-
-**With This Solution** (15 minutes):
 ```
-User: "Show me idle resources across all clouds"
+User:  "Show me idle resources across all clouds"
 Agent: [Queries policies] → [Scans AWS, Azure, GCP] → [Returns 23 idle instances]
        Estimated monthly savings: $12,450
 
-User: "Check for cost anomalies this month"
+User:  "Check for cost anomalies this month"
 Agent: [Detects 3 anomalies] → Azure VM costs up 45% due to new dev environment
        Recommendation: Right-size or schedule shutdown
 ```
+</details>
 
-### Use Case 2: Compliance Audit Preparation
-**Scenario**: Security team preparing for SOC 2 audit, needs compliance report.
+<details>
+<summary><strong>Use Case 2 — Compliance Audit Preparation (5 min vs 2–3 days)</strong></summary>
 
-**Traditional Approach** (2-3 days):
-1. Manually check tagging across all cloud accounts
-2. Verify encryption settings for each storage service
-3. Identify publicly accessible resources
-4. Compile findings into audit report
-
-**With This Solution** (5 minutes):
 ```
-User: "Run compliance check across all clouds"
+User:  "Run compliance check across all clouds"
 Agent: [Applies compliance policies] → [Scans 1,247 resources]
        - 34 resources missing mandatory tags
        - 7 unencrypted S3 buckets
        - 2 publicly accessible databases
        [Generates detailed compliance report with remediation steps]
 ```
+</details>
 
-### Use Case 3: New Resource Tracking
-**Scenario**: Infrastructure team needs to track resources created in last 7 days for change management.
+<details>
+<summary><strong>Use Case 3 — New Resource Tracking</strong></summary>
 
-**With This Solution**:
 ```
-User: "Show new resources created in the last week"
+User:  "Show new resources created in the last week"
 Agent: [Queries all clouds] → 15 new resources found
-       - 8 EC2 instances (AWS)
-       - 4 VMs (Azure)
-       - 3 Compute Engine instances (GCP)
+       - 8 EC2 instances (AWS), 4 VMs (Azure), 3 Compute Engine instances (GCP)
        [Flags 5 resources without proper tagging]
 ```
+</details>
 
-### Use Case 4: Budget Health Monitoring
-**Scenario**: CFO wants real-time visibility into cloud spend vs. budget.
+<details>
+<summary><strong>Use Case 4 — Budget Health Monitoring</strong></summary>
 
-**With This Solution**:
 ```
-User: "What's our budget health status?"
-Agent: [Analyzes spend across all clouds]
-       - AWS: 78% of budget ($234K/$300K) - On track
-       - Azure: 92% of budget ($184K/$200K) - Warning threshold
-       - GCP: 105% of budget ($105K/$100K) - Over budget
+User:  "What's our budget health status?"
+Agent: - AWS:   78% of budget ($234K/$300K) — On track
+       - Azure: 92% of budget ($184K/$200K) — Warning threshold
+       - GCP:  105% of budget ($105K/$100K) — Over budget
        [Recommends immediate cost optimization actions]
 ```
+</details>
 
-## Success Metrics & KPIs
+---
 
-### Quantitative Metrics
+## Key Features
 
-**Cost Savings**
-- Target: 30-40% reduction in cloud waste
-- Measurement: Monthly comparison of idle resource costs before/after
-- Baseline: $500K annual cloud spend → Target: $150K-$200K savings
+| Capability | Detail |
+|---|---|
+| **Natural Language Queries** | Ask questions in plain English — no CLI or API knowledge required |
+| **Unified Multi-Cloud View** | Single interface for AWS, Azure, and GCP simultaneously |
+| **Agentic AI Reasoning** | Context-aware agent applies governance policies before responding |
+| **Policy Knowledge Graph** | IBM Context Studio enforces tagging, encryption, and budget rules |
+| **Real-time Anomaly Detection** | Statistical analysis flags cost spikes >20% above baseline |
+| **Browser Chat UI** | React + TypeScript webapp with cloud-provider selector and Markdown rendering |
+| **Idle Resource Detection** | Identifies instances with CPU <5% for 14 consecutive days |
+| **Compliance Monitoring** | Checks tagging, encryption, public access, backup, and logging rules |
+| **Budget Tracking** | Proactive warnings at 80% utilisation; critical alerts at 100% |
 
-**Time Efficiency**
-- Target: 70% reduction in manual infrastructure analysis time
-- Measurement: Hours spent on reporting and analysis per week
-- Baseline: 20 hours/week → Target: 6 hours/week
+---
 
-**Compliance Coverage**
-- Target: 100% resource compliance monitoring
-- Measurement: % of resources checked vs. total resources
-- Baseline: 30% (manual audits) → Target: 100% (automated)
+## Business Value
 
-**Response Time**
-- Target: <2 minutes for any infrastructure query
-- Measurement: Average query response time
-- Baseline: Hours/days (manual) → Target: Seconds (automated)
+### Quantitative Targets
 
-### Qualitative Metrics
+| Metric | Baseline | Target | Method |
+|---|---|---|---|
+| Cloud waste reduction | — | 30–40% | Monthly idle resource cost comparison |
+| Manual analysis time | 20 hrs/week | 6 hrs/week | Team surveys |
+| Compliance coverage | 30% (manual) | 100% (automated) | Resources checked vs total |
+| Query response time | Hours/days | <2 minutes | Performance monitoring |
+| Cost savings identified | — | $50K+/month | Monthly cost reports |
 
-**User Satisfaction**
-- Infrastructure team feedback on ease of use
-- Reduction in escalations to cloud specialists
-- Adoption rate across teams
+### Competitive Differentiation
 
-**Risk Reduction**
-- Number of compliance violations prevented
-- Security incidents avoided
-- Audit readiness improvement
+| Feature | This Solution | Traditional Tools |
+|---|---|---|
+| Natural Language Queries | ✅ Yes | ❌ No (CLI/API only) |
+| Multi-Cloud Unified View | ✅ AWS, Azure, GCP | ⚠️ Single cloud focus |
+| Agentic AI Reasoning | ✅ Context-aware | ❌ Rule-based only |
+| Policy Knowledge Graph | ✅ Context Studio | ❌ Static configs |
+| Real-time Anomaly Detection | ✅ Statistical analysis | ⚠️ Threshold-based only |
+| Deployment Time | ✅ 2–3 hours | ⚠️ Days/weeks |
 
-**Business Agility**
-- Faster decision-making on cloud investments
-- Improved resource allocation
-- Enhanced multi-cloud strategy execution
-
-### Success Criteria (90-Day Evaluation)
-
-| Metric | Target | Measurement Method |
-|--------|--------|-------------------|
-| Cost Savings Identified | $50K+ | Monthly cost reports |
-| Idle Resources Detected | 100+ | Tool output logs |
-| Compliance Violations Found | 50+ | Compliance reports |
-| Query Response Time | <2 min | Performance monitoring |
-| User Adoption | 80%+ | Active user count |
-| Time Saved per Week | 14+ hours | Team surveys |
-**Multi-Cloud Capability**: The MCP server code is fully implemented for AWS, Azure, and GCP. Currently tested with AWS credentials only. To enable Azure and GCP, simply add their respective credentials to the configuration.
+---
 
 ## Architecture
 
@@ -259,7 +218,7 @@ Agent: [Analyzes spend across all clouds]
 │  │ (7 Policy Tools)  │ │ (8 Data Tools)    │ │                       │    │
 │  └─────────┬─────────┘ └─────────┬─────────┘ └───────────────────────┘    │
 │            │                      │                                         │
-└────────────┼───────────────────────┼─────────────────────────────────────────┘
+└────────────┼──────────────────────┼─────────────────────────────────────────┘
              │                      │
              ▼                      ▼
 ┌─────────────────────┐  ┌─────────────────────────────────────────────────┐
@@ -292,22 +251,151 @@ Agent: [Analyzes spend across all clouds]
                          └─────────────────────────────────────────┘
 ```
 
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|---|---|
+| **Web UI** | React 18, TypeScript, Vite 5 |
+| **Backend API** | Python FastAPI, uvicorn, httpx |
+| **MCP Server** | Python 3.11, FastMCP 2.14 |
+| **AI Orchestration** | IBM Consulting Advantage, Strands agent runtime |
+| **Workflow Engine** | IBM Langflow (A2A protocol) |
+| **Policy Store** | IBM Context Studio, JSON-LD knowledge graph |
+| **AWS SDK** | boto3, CloudWatch, Cost Explorer |
+| **Azure SDK** | azure-identity, azure-mgmt-compute, azure-mgmt-costmanagement |
+| **GCP SDK** | google-cloud-compute, google-cloud-billing, google-cloud-monitoring |
+| **Infrastructure** | AWS EC2 (t2.micro), systemd service |
+
+---
+
+## Repository Structure
+
+```
+MultiCloudInfraIntel/
+├── mcp_server.py              # Main MCP server — 8 multi-cloud tools
+├── requirements.txt           # MCP server Python dependencies
+├── config.yaml                # Server configuration (ports, budgets, thresholds)
+├── .env.example               # Environment variables template
+├── README.md                  # This file
+│
+├── policies/                  # Governance policy files for Context Studio
+│   ├── resource-policy.md
+│   ├── cost-trends-policy.md
+│   ├── anomaly-policy.md
+│   ├── new-resource-policy.md
+│   ├── idle-resource-policy.md
+│   ├── compliance-policy.md
+│   ├── expensive-resource-policy.md
+│   └── budget-policy.md
+│
+├── schema/                    # JSON-LD ontology schema for Context Studio
+│   └── multi-cloud-policies.jsonld
+│
+├── tests/                     # Unit and integration tests
+│   ├── test_mcp_server.py
+│   ├── test_integration.py
+│   └── validate_tools.py
+│
+├── scripts/                   # Utility and validation scripts
+│   ├── test_aws_connection.py
+│   └── test_tools_simple.py
+│
+├── docs/                      # Extended documentation
+│   ├── Architecture.md
+│   ├── PROJECT_SUMMARY.md
+│   ├── IMPLEMENTATION_GUIDE.md
+│   └── LOCAL_TESTING.md
+│
+└── webapp/                    # Browser-based chat interface
+    ├── README.md              # Webapp quick start guide
+    ├── backend/               # Python FastAPI backend (port 8001)
+    │   ├── main.py            # FastAPI app — CORS, /api/chat, /health
+    │   ├── ica_adapter.py     # ICA Langflow adapter — auth + extraction
+    │   ├── requirements.txt   # Backend Python dependencies
+    │   └── .env.example       # Backend environment template
+    └── frontend/              # React + TypeScript frontend (port 5173)
+        ├── index.html         # Vite entry point
+        ├── package.json       # Node dependencies
+        ├── vite.config.ts     # Vite config + /api → :8001 proxy
+        ├── tsconfig.json      # TypeScript strict mode config
+        └── src/
+            ├── main.tsx       # React 18 createRoot entry point
+            ├── App.tsx        # Root component — owns all state
+            ├── App.css        # Layout + component styles
+            ├── index.css      # CSS reset + CSS variables
+            ├── types.ts       # Shared TypeScript types
+            ├── api/
+            │   └── chat.ts    # axios API client + error handling
+            └── components/
+                ├── CloudSelector.tsx  # Provider pill buttons
+                ├── ChatWindow.tsx     # Message history + Markdown
+                └── ChatInput.tsx      # Auto-resize textarea + Send
+```
+
+---
+
 ## Prerequisites
 
-- IBM Consulting Advantage (ICA) access
-- **Cloud Provider Credentials** (one or more):
-  - **AWS**: EC2, Cost Explorer, CloudWatch, Config permissions
-  - **Azure**: Virtual Machines, Cost Management, Monitor, Policy
-  - **GCP**: Compute Engine, Billing, Cloud Monitoring, Asset Inventory
-- Python 3.11+ for local development
+**Platform access**
+- IBM Consulting Advantage (ICA) account with Agentic App Studio access
+- IBM Context Studio access
+- ICA Langflow workflow with a configured MulticloudIntelFlow
+
+**Cloud credentials** (one or more)
+- **AWS**: IAM permissions for EC2, Cost Explorer, CloudWatch, Config
+- **Azure**: Subscription with Virtual Machines, Cost Management, Monitor, Policy
+- **GCP**: Project with Compute Engine, Billing, Cloud Monitoring, Asset Inventory
+
+**Local environment**
+- Python 3.11+
+- Node.js 18+
 - Git
-- Bob Access
 
-**Note**: The solution is fully multi-cloud capable. Currently tested with AWS credentials. Azure and GCP support is code-ready and can be enabled by adding credentials.
+> **Note**: The solution is fully multi-cloud capable. Currently tested with AWS credentials. Azure and GCP activate automatically once credentials are provided.
 
-## Complete Implementation Guide
+---
 
-### Phase 1: Context Studio Setup (Policies)
+## Quick Start
+
+The fastest path to a running system (assumes ICA and AWS are already configured):
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Suvendu-IBM/MultiCloudInfraIntel.git
+cd MultiCloudInfraIntel
+
+# 2. Configure the webapp backend
+cp webapp/backend/.env.example webapp/backend/.env
+# Edit webapp/backend/.env — set ICA_WORKFLOW_URL and ICA_API_KEY
+
+# 3. Start the backend (Terminal 1)
+cd webapp/backend
+pip install -r requirements.txt
+uvicorn main:app --port 8001 --reload
+
+# 4. Start the frontend (Terminal 2)
+cd webapp/frontend
+npm install
+npm run dev
+
+# 5. Open the chat interface
+# → http://localhost:5173
+```
+
+Set these two variables in `webapp/backend/.env`:
+
+| Variable | Value | Where to find it |
+|---|---|---|
+| `ICA_WORKFLOW_URL` | `https://langflow.servicesessentials.ibm.com/api/v1/run/<flow-id>` | Langflow UI URL bar when flow is open |
+| `ICA_API_KEY` | `sk-...` | Value after `"--headers", "x-api-key"` in your MCP server config JSON |
+
+---
+
+## Deployment
+
+### Phase 1 — Context Studio Setup
 
 #### Step 1.1: Generate JSON-LD Schema
 
@@ -329,27 +417,29 @@ Save the output as `schema/multi-cloud-policies.jsonld`.
 
 Create these files in the `policies/` directory:
 
-1. **resource-policy.md** - Resource discovery and filtering rules
-2. **cost-trends-policy.md** - Cost analysis standards
-3. **anomaly-policy.md** - Anomaly detection thresholds
-4. **new-resource-policy.md** - New resource tracking rules
-5. **idle-resource-policy.md** - Idle resource definitions
-6. **compliance-policy.md** - Tagging, encryption, access rules
-7. **expensive-resource-policy.md** - Cost threshold definitions
-8. **budget-policy.md** - Budget allocation and alerting
+1. **resource-policy.md** — Resource discovery and filtering rules
+2. **cost-trends-policy.md** — Cost analysis standards
+3. **anomaly-policy.md** — Anomaly detection thresholds
+4. **new-resource-policy.md** — New resource tracking rules
+5. **idle-resource-policy.md** — Idle resource definitions
+6. **compliance-policy.md** — Tagging, encryption, access rules
+7. **expensive-resource-policy.md** — Cost threshold definitions
+8. **budget-policy.md** — Budget allocation and alerting
 
 #### Step 1.3: Import to Context Studio
 
 1. Navigate to Context Studio in ICA
-2. Click "Start with a Schema" → "Create schema" → "Import schema"
+2. Click **"Start with a Schema"** → **"Create schema"** → **"Import schema"**
 3. Upload `multi-cloud-policies.jsonld`
-4. Name: "Multi-Cloud Policies" → Publish
-5. Click "Create a Context" → Name: "Multi-Cloud Infrastructure Context"
+4. Name: `Multi-Cloud Policies` → Publish
+5. Click **"Create a Context"** → Name: `Multi-Cloud Infrastructure Context`
 6. Link the schema
-7. Go to "Source & Data" tab → Upload all 8 policy markdown files
-8. Click "Expose as MCP" → Copy the MCP Server URL and Bearer Token
+7. Go to **"Source & Data"** tab → Upload all 8 policy markdown files
+8. Click **"Expose as MCP"** → Copy the MCP Server URL and Bearer Token
 
-### Phase 2: Deploy MCP Server on EC2
+---
+
+### Phase 2 — MCP Server Deployment
 
 #### Step 2.1: Launch EC2 Instance
 
@@ -375,15 +465,14 @@ source mcp-env/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure AWS credentials (required for current testing)
+# Configure AWS credentials
 aws configure
 # Enter: AWS Access Key ID, Secret Key, region (ap-south-1)
 
-# Optional: Configure Azure credentials
-# az login
-# az account set --subscription <subscription-id>
+# Optional: Azure credentials
+# az login && az account set --subscription <subscription-id>
 
-# Optional: Configure GCP credentials
+# Optional: GCP credentials
 # gcloud auth application-default login
 # gcloud config set project <project-id>
 ```
@@ -391,7 +480,6 @@ aws configure
 #### Step 2.3: Run as Systemd Service
 
 ```bash
-# Create service file
 sudo nano /etc/systemd/system/mcp-server.service
 ```
 
@@ -420,34 +508,36 @@ sudo systemctl start mcp-server
 sudo systemctl status mcp-server
 ```
 
-### Phase 3: ICA Agentic App Studio Setup
+---
+
+### Phase 3 — ICA Agent Configuration
 
 #### Step 3.1: Create Agentic App
 
 1. Navigate to ICA Agentic App Studio
-2. Click "Create an Agentic App"
-3. Name: "Multi-Cloud Intelligence App"
-4. Category: "IT Operations & Cloud Management"
-5. Description: "Agentic AI for multi-cloud cost, resource, and compliance intelligence"
+2. Click **"Create an Agentic App"**
+3. Name: `Multi-Cloud Intelligence App`
+4. Category: `IT Operations & Cloud Management`
+5. Description: `Agentic AI for multi-cloud cost, resource, and compliance intelligence`
 
 #### Step 3.2: Add MCP Servers
 
 **Multi-Cloud MCP (Infrastructure Data):**
-- Name: "Multi-Cloud MCP"
+- Name: `Multi-Cloud MCP`
 - URL: `http://<EC2-PUBLIC-IP>:8000/sse`
 - Transport: Remote (HTTP/S)
 
 **Context Studio MCP (Policies):**
-- Name: "MultiCloudIntel-Policies"
-- URL: (from Context Studio exposure)
-- Authentication: Bearer Token (from Context Studio)
+- Name: `MultiCloudIntel-Policies`
+- URL: *(from Context Studio exposure)*
+- Authentication: Bearer Token *(from Context Studio)*
 
 #### Step 3.3: Create Virtual Server
 
-1. Go to "MCP Servers" → "Access MCP Gateway"
-2. Go to "Virtual Server" tab → "Create Virtual Server"
+1. Go to **"MCP Servers"** → **"Access MCP Gateway"**
+2. Go to **"Virtual Server"** tab → **"Create Virtual Server"**
 3. Name: `multi-cloud-mcp-virtual-server`
-4. Select ALL tools from both MCP servers (15 total tools)
+4. Select ALL tools from both MCP servers (15 total)
 5. Save
 
 #### Step 3.4: Create Agent
@@ -523,308 +613,72 @@ spec:
       role: Multi-Cloud Infrastructure Analyst
       instructions: |
         You are a production-grade multi-cloud infrastructure analyst.
-        
+
         MANDATORY EXECUTION ORDER:
         1. Query Context Studio FIRST for policies
         2. Call infrastructure tools with policy values
         3. Compare results and provide actionable insights
-        
+
         FIXED CONTEXT:
         - context_id: ctx_eeac88f77918
         - AgentPersona: multi-cloud-infrastructure-analyst
-               
+
         Always include Tool Trace showing which tools were called.
       model: gpt-5.2
 ```
 
 #### Step 3.5: Create Workflow
 
-1. Go to "Workflow" page → "Create New Workflow"
-2. Name: "MulticloudIntelFlow"
-3. Add components: Chat Input → ICA Agent → Chat Output
+1. Go to **"Workflow"** page → **"Create New Workflow"**
+2. Name: `MulticloudIntelFlow`
+3. Add components: **Chat Input** → **ICA Agent** → **Chat Output**
 4. Connect the components
 5. Save
 
-### Phase 4: Testing
-
-#### Step 4.1: Test via Web Application (Recommended)
-
-Start the webapp and open **http://localhost:5173** (see [Web Application](#web-application) section below for setup).
-
-Ask these questions in sequence using the chat interface:
-
-```
-# Test 1: Policy Retrieval
-hi
-
-# Test 2: Resource Listing
-List all resources
-
-# Test 3: Idle Detection
-Find idle resources
-
-# Test 4: Compliance Check
-Check compliance
-```
-
-> **Alternative:** You can also test directly in the ICA Agentic App Studio sandbox by opening the agent in the playground and sending the same questions.
-
-#### Step 4.2: Expected Results
-
-| Query | Expected Response |
-|-------|-------------------|
-| "hi" | Agent introduces capabilities |
-| "List all resources" | Returns resources from configured cloud providers |
-| "Find idle resources" | Returns idle instances with CPU utilization metrics |
-| "Check compliance" | Returns tagging and encryption violations across clouds |
-
-**Note**: Results shown are from AWS testing. With Azure/GCP credentials configured, the agent will query all three cloud providers simultaneously.
-
-## The 8 MCP Tools
-
-| # | Tool Name | Description | Cloud Support |
-|---|-----------|-------------|---------------|
-| 1 | get-resource-summary | Unified resource inventory across clouds | AWS, Azure, GCP |
-| 2 | get-cost-trends | Cost trends by provider and service | AWS, Azure, GCP |
-| 3 | get-cost-anomaly | Detect statistically significant cost anomalies | AWS, Azure, GCP |
-| 4 | get-new-resources-since | Identify resources created after a given date | AWS, Azure, GCP |
-| 5 | find-idle-resources | Detect idle or underutilized infrastructure | AWS, Azure, GCP |
-| 6 | check-compliance | Check tagging, encryption, public access | AWS, Azure, GCP |
-| 7 | get-top-expensive-resources | Identify highest-cost resources | AWS, Azure, GCP |
-| 8 | get-budget-health | Evaluate actual vs projected spend against budget | AWS, Azure, GCP |
-
-**All tools are multi-cloud ready**. The code supports AWS, Azure, and GCP. Currently tested with AWS credentials only.
-
-## Context Studio Policies (8 Files)
-
-| # | Policy File | Purpose |
-|---|-------------|---------|
-| 1 | resource-policy.md | Resource discovery, filtering, tagging rules |
-| 2 | cost-trends-policy.md | Cost analysis standards and reporting |
-| 3 | anomaly-policy.md | Anomaly detection thresholds (20% default) |
-| 4 | new-resource-policy.md | New resource tracking (7-day window) |
-| 5 | idle-resource-policy.md | Idle definitions (CPU <5% for 14 days) |
-| 6 | compliance-policy.md | Mandatory tags, encryption, access rules |
-| 7 | expensive-resource-policy.md | Cost threshold definitions (>$500/month) |
-| 8 | budget-policy.md | Budget allocation and alerting (80%/100%) |
-
-## Project Structure
-
-```
-MultiCloudInfraIntel/
-├── mcp_server.py              # Main MCP server with 8 tools
-├── requirements.txt           # Python dependencies
-├── config.yaml                # Configuration file
-├── .env.example               # Environment variables template
-├── README.md                  # This file
-│
-├── policies/                  # 8 policy markdown files for Context Studio
-│   ├── resource-policy.md
-│   ├── cost-trends-policy.md
-│   ├── anomaly-policy.md
-│   ├── new-resource-policy.md
-│   ├── idle-resource-policy.md
-│   ├── compliance-policy.md
-│   ├── expensive-resource-policy.md
-│   └── budget-policy.md
-│
-├── schema/                    # JSON-LD schema for Context Studio
-│   └── multi-cloud-policies.jsonld
-│
-├── tests/                     # Unit and integration tests
-│   ├── test_mcp_server.py
-│   ├── test_integration.py
-│   └── validate_tools.py
-│
-├── scripts/                   # Utility and validation scripts
-│   ├── test_aws_connection.py
-│   └── test_tools_simple.py
-│
-├── docs/                      # Documentation
-│   ├── Architecture.md
-│   ├── PROJECT_SUMMARY.md
-│   ├── IMPLEMENTATION_GUIDE.md
-│   └── LOCAL_TESTING.md
-│
-└── webapp/                    # Web Application (React + FastAPI)
-    ├── README.md              # Webapp quick start guide
-    ├── backend/               # Python FastAPI backend
-    │   ├── main.py            # FastAPI server (port 8001)
-    │   ├── ica_adapter.py     # ICA Workflow API adapter
-    │   ├── requirements.txt   # Backend Python dependencies
-    │   └── .env.example       # Backend environment template
-    └── frontend/              # React + TypeScript frontend
-        ├── index.html         # Vite entry point
-        ├── package.json       # Node dependencies
-        ├── vite.config.ts     # Vite config + /api proxy
-        ├── tsconfig.json      # TypeScript strict config
-        └── src/
-            ├── main.tsx       # React 18 entry point
-            ├── App.tsx        # Root component
-            ├── App.css        # Layout + component styles
-            ├── index.css      # CSS reset + variables
-            ├── types.ts       # Shared TypeScript types
-            ├── api/
-            │   └── chat.ts    # API client (axios)
-            └── components/
-                ├── CloudSelector.tsx  # Provider pill buttons
-                ├── ChatWindow.tsx     # Message history
-                └── ChatInput.tsx      # Textarea + Send
-```
-
-## Performance Metrics
-
-| Operation | Response Time |
-|-----------|---------------|
-| Resource listing | ~28 seconds |
-| Idle detection | ~30 seconds |
-| Compliance check | ~20 seconds |
-| Policy retrieval | ~22 seconds |
-
-## Troubleshooting
-
-### MCP Server not accessible
-
-```bash
-# Check service status
-sudo systemctl status mcp-server
-
-# Check logs
-sudo journalctl -u mcp-server -f
-
-# Verify port is open
-sudo netstat -tlnp | grep 8000
-```
-
-### ICA Gateway shows "Invalid Host header"
-
-```bash
-# Restart with correct host binding
-python mcp_server.py --transport http --port 8000 --host 0.0.0.0
-```
-
-### No resources found from cloud providers
-
-```bash
-# Verify AWS credentials
-aws sts get-caller-identity
-aws ec2 describe-instances --region ap-south-1
-
-# Verify Azure credentials (if configured)
-az account show
-az vm list --output table
-
-# Verify GCP credentials (if configured)
-gcloud auth list
-gcloud compute instances list
-```
-
-### Enabling Multi-Cloud Support
-
-The solution is **fully multi-cloud capable**. To enable Azure and GCP:
-
-1. **Azure Setup**:
-```bash
-# Install Azure CLI
-pip install azure-cli azure-mgmt-compute azure-mgmt-monitor azure-mgmt-costmanagement
-
-# Login and set subscription
-az login
-az account set --subscription <subscription-id>
-```
-
-2. **GCP Setup**:
-```bash
-# Install GCP SDK
-pip install google-cloud-compute google-cloud-monitoring google-cloud-billing
-
-# Authenticate
-gcloud auth application-default login
-gcloud config set project <project-id>
-```
-
-3. **Restart MCP Server**:
-```bash
-sudo systemctl restart mcp-server
-```
-
-The MCP server will automatically detect and query all configured cloud providers.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-Copyright © 2026. All rights reserved.
-
-## Contact
-
-For questions or support, please refer to the project repository or contact the development team.
-
 ---
 
-## Web Application
+### Phase 4 — Web Application Setup
 
-A browser-based natural language chat interface for multi-cloud infrastructure intelligence.
-Built with React + TypeScript frontend and Python FastAPI backend, powered by IBM Consulting Advantage ICA Workflow API.
+The webapp provides a browser-based chat interface that connects directly to the ICA Langflow workflow.
 
-### Architecture
+**Port map — no conflicts:**
 
-```
-Browser (localhost:5173)
-    ↓ React + TypeScript (Vite)
-    ↓ Cloud selector + Chat UI + Markdown rendering
+| Component | Port |
+|---|---|
+| MCP Server (EC2) | 8000 |
+| FastAPI Backend | 8001 |
+| React Frontend | 5173 |
 
-FastAPI Backend (localhost:8001)
-    ↓ ICAAdapter with authentication handling
-    ↓ Multi-cloud context injection
-
-ICA Workflow API (IBM Consulting Advantage)
-    ↓ MulticloudIntelFlow
-    ↓ ICA Agent with 15 tools
-
-MCP Server (EC2 port 8000)
-    ↓ 8 multi-cloud infrastructure tools
-
-AWS / Azure / GCP
-    ↓ Real-time cloud data
-```
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- ICA Workflow API access
-- Active ICA session credentials
-
-### Quick Start
-
-**Step 1: Configure backend environment**
+#### Step 4.1: Configure Backend Environment
 
 ```bash
 cd webapp/backend
 cp .env.example .env
 ```
 
-Edit `.env` and set:
+Edit `webapp/backend/.env`:
 
-| Variable | Description |
-|---|---|
-| `ICA_WORKFLOW_URL` | Your ICA workflow run URL |
-| `ICA_API_KEY` | Your ICA API key (`sk-` prefix) |
+```env
+ICA_WORKFLOW_URL=https://langflow.servicesessentials.ibm.com/api/v1/run/<flow-id>
+ICA_API_KEY=sk-<your-x-api-key-from-mcp-config>
+BACKEND_PORT=8001
+CORS_ORIGINS=*
+```
 
-> **Getting the correct values:**
-> - `ICA_WORKFLOW_URL`: `https://langflow.servicesessentials.ibm.com/api/v1/run/<flow-id>`
->   The flow ID is visible in the Langflow UI URL bar when your flow is open.
-> - `ICA_API_KEY`: The `x-api-key` value from your MCP server configuration JSON
->   (the value after `"--headers", "x-api-key"` in the `args` array).
+> **Finding the values:**
+> - `ICA_WORKFLOW_URL`: Open your flow in the Langflow UI — the Flow ID is in the URL bar
+> - `ICA_API_KEY`: The value after `"--headers", "x-api-key"` in your MCP server configuration JSON
 
-**Step 2: Start the backend**
+**Backend environment variables:**
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `ICA_WORKFLOW_URL` | ✅ | — | Full Langflow run URL |
+| `ICA_API_KEY` | ✅ | — | `x-api-key` from MCP server config |
+| `BACKEND_PORT` | ❌ | `8001` | Displayed in startup log |
+| `CORS_ORIGINS` | ❌ | `*` | Comma-separated allowed origins |
+
+#### Step 4.2: Start the Backend
 
 ```bash
 cd webapp/backend
@@ -842,7 +696,7 @@ INFO  ICAAdapter initialised successfully.
 INFO  Uvicorn running on http://127.0.0.1:8001
 ```
 
-**Step 3: Start the frontend**
+#### Step 4.3: Start the Frontend
 
 Open a new terminal:
 
@@ -859,29 +713,20 @@ Expected output:
   ➜  Local:   http://localhost:5173/
 ```
 
-**Step 4: Open the application**
+Open **http://localhost:5173** in your browser.
 
-Open browser at: **http://localhost:5173**
+#### Step 4.4: Web Application Features
 
-### Features
+- **Cloud provider selector** — All Clouds, AWS, Azure, GCP with brand colour pills
+  - All Clouds `#6366f1` · AWS `#f97316` · Azure `#3b82f6` · GCP `#ef4444`
+- **Markdown rendering** for AI responses — tables, code blocks, headers
+- **Auto-scroll** to latest message
+- **Loading indicator** (three-dot animation) during agent processing
+- **Enter** to send · **Shift+Enter** for new line
+- **Auto-resizing** textarea (up to 6 lines)
+- User-friendly error messages on network or API failure
 
-- Natural language queries across cloud providers
-- Cloud provider selector: **All Clouds**, **AWS**, **Azure**, **GCP**
-- Brand colour-coded pill buttons:
-  - All Clouds = purple `#6366f1`
-  - AWS = orange `#f97316`
-  - Azure = blue `#3b82f6`
-  - GCP = red `#ef4444`
-- Markdown rendering for AI responses (tables, code blocks, headers)
-- Three-dot loading indicator during agent processing
-- Error handling with user-friendly messages
-- Auto-scroll to latest response
-- Enter to send, Shift+Enter for new line
-- Auto-resizing textarea (up to 6 lines)
-
-### API Endpoints
-
-Backend runs on port 8001:
+#### Step 4.5: Backend API Reference
 
 | Method | Path | Description |
 |---|---|---|
@@ -889,7 +734,7 @@ Backend runs on port 8001:
 | `GET` | `/health` | Health check → `{"status": "ok"}` |
 | `POST` | `/api/chat` | Send question, receive AI answer |
 
-**POST `/api/chat` request:**
+**Request:**
 
 ```json
 {
@@ -898,7 +743,7 @@ Backend runs on port 8001:
 }
 ```
 
-Valid `cloud_provider` values: `all`, `aws`, `azure`, `gcp`
+Valid `cloud_provider` values: `all` · `aws` · `azure` · `gcp`
 
 **Response:**
 
@@ -909,17 +754,15 @@ Valid `cloud_provider` values: `all`, `aws`, `azure`, `gcp`
 }
 ```
 
-**Error responses:**
+**Error codes:**
 
 | Status | Cause |
 |---|---|
-| 422 | Empty question or invalid cloud_provider |
+| 422 | Empty question or invalid `cloud_provider` |
 | 502 | ICA Workflow API returned an error |
 | 500 | Unexpected server error |
 
-### Cloud Context Injection
-
-Before every ICA API call the adapter appends a context sentence to the question:
+**Cloud context injection** — before every ICA call the adapter appends:
 
 | Selection | Appended text |
 |---|---|
@@ -928,54 +771,193 @@ Before every ICA API call the adapter appends a context sentence to the question
 | Azure | "Focus on Microsoft Azure only." |
 | GCP | "Focus on Google Cloud Platform only." |
 
-### Project Structure
+---
+
+## Testing
+
+### Run via Web Application (Recommended)
+
+Start both webapp servers (see [Phase 4](#phase-4--web-application-setup)) and open **http://localhost:5173**. Send these queries in sequence:
 
 ```
-webapp/
-├── README.md                      Quick start guide
-├── backend/
-│   ├── ica_adapter.py             ICA Workflow API adapter
-│   ├── main.py                    FastAPI server
-│   ├── requirements.txt           Python dependencies
-│   └── .env.example               Environment template
-└── frontend/
-    ├── index.html                 Entry point
-    ├── package.json               Node dependencies
-    ├── vite.config.ts             Vite + proxy config (/api → :8001)
-    ├── tsconfig.json              TypeScript strict config
-    └── src/
-        ├── main.tsx               React 18 entry point
-        ├── App.tsx                Root component (owns all state)
-        ├── App.css                Layout + component styles
-        ├── index.css              CSS reset + variables
-        ├── types.ts               Shared TypeScript types
-        ├── api/
-        │   └── chat.ts            API client (axios + error handling)
-        └── components/
-            ├── CloudSelector.tsx  Cloud provider pill buttons
-            ├── ChatWindow.tsx     Message history + Markdown rendering
-            └── ChatInput.tsx      Auto-resize textarea + Send button
+hi
+List all resources
+Find idle resources
+Check compliance
+Show cost anomalies from the last 30 days
+What are the top 10 most expensive resources?
 ```
 
-### Environment Variables
+> **Alternative:** Open your flow in the ICA Agentic App Studio sandbox and send the same questions directly.
 
-`webapp/backend/.env` variables:
+### Expected Results
 
-| Variable | Required | Default | Description |
+| Query | Expected Response |
+|---|---|
+| `hi` | Agent introduces capabilities |
+| `List all resources` | Unified resource inventory across configured clouds |
+| `Find idle resources` | Idle instances with CPU utilisation metrics |
+| `Check compliance` | Tagging and encryption violations with remediation steps |
+| `Cost anomalies` | Anomaly table with severity, date, and contributing providers |
+
+> Results shown are from AWS testing. With Azure/GCP credentials configured, the agent queries all three cloud providers simultaneously.
+
+### Unit Tests
+
+```bash
+# From project root
+pytest tests/ -v
+pytest tests/test_mcp_server.py -v
+pytest tests/test_integration.py -v
+```
+
+---
+
+## MCP Tools Reference
+
+| # | Tool | Description | Cloud Support |
 |---|---|---|---|
-| `ICA_WORKFLOW_URL` | ✅ | — | ICA Langflow run endpoint URL |
-| `ICA_API_KEY` | ✅ | — | ICA API key (`sk-` prefix, from MCP config) |
-| `BACKEND_PORT` | ❌ | `8001` | Port shown in startup log |
-| `CORS_ORIGINS` | ❌ | `*` | Comma-separated allowed origins |
+| 1 | `get-resource-summary` | Unified resource inventory across clouds | AWS, Azure, GCP |
+| 2 | `get-cost-trends` | Cost trends by provider and service | AWS, Azure, GCP |
+| 3 | `get-cost-anomaly` | Detect statistically significant cost anomalies | AWS, Azure, GCP |
+| 4 | `get-new-resources-since` | Identify resources created after a given date | AWS, Azure, GCP |
+| 5 | `find-idle-resources` | Detect idle or underutilized infrastructure | AWS, Azure, GCP |
+| 6 | `check-compliance` | Check tagging, encryption, public access | AWS, Azure, GCP |
+| 7 | `get-top-expensive-resources` | Identify highest-cost resources | AWS, Azure, GCP |
+| 8 | `get-budget-health` | Evaluate actual vs projected spend against budget | AWS, Azure, GCP |
 
-### Complete Solution Architecture
+> All tools are **multi-cloud ready**. Currently tested with AWS credentials. Enable Azure and GCP by adding their credentials — no code changes required.
 
-The webapp is part of the complete PESAMultiCloudIntel solution:
+---
 
-| Component | Location | Port |
+## Context Studio Policies
+
+| # | Policy File | Purpose |
 |---|---|---|
-| MCP Server | EC2 | 8000 |
-| FastAPI Backend | Local | 8001 |
-| React Frontend | Local | 5173 |
-| ICA Agent | IBM Cloud | — |
-| Context Studio | IBM Cloud | — |
+| 1 | `resource-policy.md` | Resource discovery, filtering, and tagging rules |
+| 2 | `cost-trends-policy.md` | Cost analysis standards and reporting |
+| 3 | `anomaly-policy.md` | Anomaly detection thresholds (20% default) |
+| 4 | `new-resource-policy.md` | New resource tracking (7-day window) |
+| 5 | `idle-resource-policy.md` | Idle resource definitions (CPU <5% for 14 days) |
+| 6 | `compliance-policy.md` | Mandatory tags, encryption, and access rules |
+| 7 | `expensive-resource-policy.md` | Cost threshold definitions (>$500/month) |
+| 8 | `budget-policy.md` | Budget allocation and alerting (80%/100% thresholds) |
+
+---
+
+## Performance Metrics
+
+| Operation | Response Time |
+|---|---|
+| Resource listing | ~28 seconds |
+| Idle detection | ~30 seconds |
+| Compliance check | ~20 seconds |
+| Policy retrieval | ~22 seconds |
+
+---
+
+## Troubleshooting
+
+### MCP Server not accessible
+
+```bash
+# Check service status
+sudo systemctl status mcp-server
+
+# View live logs
+sudo journalctl -u mcp-server -f
+
+# Verify port is open
+sudo netstat -tlnp | grep 8000
+```
+
+### ICA Gateway shows "Invalid Host header"
+
+```bash
+# Restart with correct host binding
+python mcp_server.py --transport http --port 8000 --host 0.0.0.0
+```
+
+### No resources returned from cloud providers
+
+```bash
+# Verify AWS credentials
+aws sts get-caller-identity
+aws ec2 describe-instances --region ap-south-1
+
+# Verify Azure credentials (if configured)
+az account show
+az vm list --output table
+
+# Verify GCP credentials (if configured)
+gcloud auth list
+gcloud compute instances list
+```
+
+### Web application — backend fails to start
+
+| Error | Fix |
+|---|---|
+| `EnvironmentError: ICA_WORKFLOW_URL not set` | Copy `.env.example` to `.env` and fill in values |
+| `EnvironmentError: ICA_API_KEY not set` | Set `ICA_API_KEY` in `webapp/backend/.env` |
+| `Address already in use` on port 8001 | Use `--port 8002` and update `CORS_ORIGINS` |
+
+### Web application — requests return 502
+
+The ICA API key may have expired. Refresh it:
+1. Open `langflow.servicesessentials.ibm.com` → your flow → API tab
+2. Copy the new `x-api-key` value
+3. Update `ICA_API_KEY` in `webapp/backend/.env`
+4. Uvicorn reloads automatically (`--reload` flag)
+
+---
+
+## Multi-Cloud Enablement
+
+The MCP server is fully implemented for all three providers. To activate Azure and GCP:
+
+**Azure:**
+
+```bash
+pip install azure-cli azure-mgmt-compute azure-mgmt-monitor azure-mgmt-costmanagement
+az login
+az account set --subscription <subscription-id>
+```
+
+**GCP:**
+
+```bash
+pip install google-cloud-compute google-cloud-monitoring google-cloud-billing
+gcloud auth application-default login
+gcloud config set project <project-id>
+```
+
+**Restart the MCP server:**
+
+```bash
+sudo systemctl restart mcp-server
+```
+
+The MCP server automatically detects and queries all configured cloud providers — no code changes required.
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes (`git commit -m 'Add my feature'`)
+4. Push to the branch (`git push origin feature/my-feature`)
+5. Open a Pull Request
+
+---
+
+## License
+
+Copyright © 2026. All rights reserved.
+
+---
+
+## Contact
+
+For questions or support, please refer to the project repository or contact the development team.
